@@ -3,8 +3,9 @@
 	<f:entry title="Name" field="name">
     	<f:textbox />
 	</f:entry>
+	
 	<f:entry title="Description" field="description">
-		<f:textbox />
+		<f:textarea name="parameter.description" value="${instance.description}" codemirror-mode="${app.markupFormatter.codeMirrorMode}" codemirror-config="${app.markupFormatter.codeMirrorConfig}" previewEndpoint="/markupFormatter/previewDescription" />
 	</f:entry>
 
 	<f:entry title="Path" field="path">
