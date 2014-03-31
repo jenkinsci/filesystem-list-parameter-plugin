@@ -1,0 +1,42 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+	<f:entry title="Name" field="name">
+    	<f:textbox />
+	</f:entry>
+	<f:entry title="Description" field="description">
+		<f:textbox />
+	</f:entry>
+
+	<f:entry title="Path" field="path">
+		<f:textbox />
+	</f:entry>
+
+	<f:entry title="Filesystem object type" field="selectedType">
+	  <j:choose>
+        <j:when test="${instance.selectedType==null}">
+	      <select name="selectedType">
+			<option value="SYMLINK">SYMLINK</option>
+			<option value="ALL">ALL</option>
+			<option value="DIRECTORY">DIRECTORY</option>
+			<option value="FILE">FILE</option>
+	      </select>
+        </j:when>
+        <j:otherwise>		
+	      <select name="selectedType">
+	        <j:forEach var="oType" items="${instance.jellyFsObjectTypes}">
+	          <f:option>${oType}</f:option>
+	        </j:forEach>
+	      </select>
+		</j:otherwise>
+      </j:choose>
+	</f:entry>
+
+	<f:entry title="Sort by last modified date" field="sortByLastModified">
+		<f:checkbox checked="${instance.sortByLastModified}"/>
+	</f:entry>
+
+	<f:entry title="Sort in reverse order" field="sortReverseOrder">
+		<f:checkbox checked="${instance.sortReverseOrder}"/>
+	</f:entry>
+
+</j:jelly>
