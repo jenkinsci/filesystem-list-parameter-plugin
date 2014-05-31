@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.servlet.ServletException;
 
@@ -80,6 +82,35 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 		}
 		
+		
+		public FormValidation doCheckIncludeRegex(@QueryParameter final String regexIncludePattern) throws IOException, ServletException {
+			if(StringUtils.isBlank(regexIncludePattern)) {
+				return FormValidation.ok();
+			}
+			
+			try {
+				Pattern.compile(regexIncludePattern);
+			} catch (PatternSyntaxException e) {
+				return FormValidation.error(Messages.FileSystemListParameterDefinition_RegExPatternNotValid(), regexIncludePattern);
+			}
+			return FormValidation.ok();
+			
+		}
+
+		public FormValidation doCheckExcludeRegex(@QueryParameter final String regexExcludePattern) throws IOException, ServletException {
+			if(StringUtils.isBlank(regexExcludePattern)) {
+				return FormValidation.ok();
+			}
+			
+			try {
+				Pattern.compile(regexExcludePattern);
+			} catch (PatternSyntaxException e) {
+				return FormValidation.error(Messages.FileSystemListParameterDefinition_RegExPatternNotValid(), regexExcludePattern);
+			}
+			return FormValidation.ok();
+			
+		}
+		
 	}
 
 		
@@ -89,6 +120,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private boolean sortByLastModified;
 	private boolean sortReverseOrder;
 	private FsObjectTypes selectedEnumType;
+	private String regexIncludePattern;
+	private String regexExcludePattern;
 
 	private String value;
 
@@ -103,7 +136,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	 * @param description
 	 */
 	@DataBoundConstructor
-	public FileSystemListParameterDefinition(String name, String description, String path, String selectedType, boolean sortByLastModified, boolean sortReverseOrder) {
+	public FileSystemListParameterDefinition(String name, String description, String path, String selectedType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified, boolean sortReverseOrder) {
 		super(name, description);
 	
 		this.path = path;
@@ -111,6 +144,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		this.selectedEnumType = FsObjectTypes.valueOf(selectedType);
 		this.sortByLastModified = sortByLastModified;
 		this.sortReverseOrder = sortReverseOrder;
+		this.regexIncludePattern = regexIncludePattern;
+		this.regexExcludePattern = regexExcludePattern;
 		this.formatter = new Formatter();
 
 	}
@@ -197,7 +232,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		
 		if (map.isEmpty()) {
 			list = new ArrayList<String>();
-			String msg = formatter.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(), getSelectedEnumType(), getPath()).toString();
+			String msg = formatter.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(), getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(), getPath()).toString() ;
 			LOGGER.warning(msg);
 			list.add(msg);
 		}else {
@@ -258,11 +293,28 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
 	}
 	
+
+	private boolean isPatternMatching(String name) {
+
+		if (getRegexIncludePattern().equals("") && getRegexExcludePattern().equals("")) {
+			return true;
+		}
+		
+		if (!getRegexIncludePattern().equals("") && getRegexExcludePattern().equals("")) {
+			return name.matches(getRegexIncludePattern());
+		}
+		if (getRegexIncludePattern().equals("") && !getRegexExcludePattern().equals("")) {
+			return !name.matches(getRegexExcludePattern());
+		}
+						
+		return name.matches(getRegexIncludePattern()) && !name.matches(getRegexExcludePattern());
+	}
+
 		
 	private void createSymlinkMap(File rootDir) throws IOException {
 		
 		for (File file : rootDir.listFiles()) {
-			if (!file.isHidden() && isSymlink(file)) {
+			if (!file.isHidden() && isSymlink(file) && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
@@ -273,7 +325,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private void createDirectoryMap(File rootDir) throws IOException {
 		
 		for (File file : rootDir.listFiles()) {
-			if (!file.isHidden() && file.isDirectory() && !isSymlink(file)) {
+			if (!file.isHidden() && file.isDirectory() && !isSymlink(file) && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
@@ -284,7 +336,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private void createFileMap(File rootDir) throws IOException {
 		
 		for (File file : rootDir.listFiles()) {
-			if (!file.isHidden() && file.isFile() && !isSymlink(file)) {
+			if (!file.isHidden() && file.isFile() && !isSymlink(file) && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
@@ -292,10 +344,13 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 
+
+
+
 	private void createAllObjectsMap(File rootDir) {
 		
 		for (File file : rootDir.listFiles()) {
-			if (!file.isHidden()) {
+			if (!file.isHidden() && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
@@ -370,4 +425,13 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	public void setValue(String value) {
 		this.value = value;
 	}
+
+	public String getRegexIncludePattern() {
+		return regexIncludePattern;
+	}
+
+	public String getRegexExcludePattern() {
+		return regexExcludePattern;
+	}
+
 }

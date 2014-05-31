@@ -1,6 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-	<f:entry title="Name" field="name">
+
+	<f:entry title="Name" field="name" >
     	<f:textbox />
 	</f:entry>
 	
@@ -30,6 +31,14 @@
 	      </select>
 		</j:otherwise>
       </j:choose>
+	</f:entry>
+
+	<f:entry title="Include Pattern" field="regexIncludePattern">
+		<f:textbox default="" />
+	</f:entry>
+
+	<f:entry title="Exclude Pattern" field="regexExcludePattern">
+		<f:textbox default="" />
 	</f:entry>
 
 	<f:entry title="Sort by last modified date" field="sortByLastModified">
