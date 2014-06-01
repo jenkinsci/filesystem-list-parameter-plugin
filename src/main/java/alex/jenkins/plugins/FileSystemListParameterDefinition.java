@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.servlet.ServletException;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -58,14 +57,14 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			return Messages.FileSystemListParameterDefinition_DisplayName();
 		}
 		
-		public FormValidation doCheckName(@QueryParameter final String name) throws IOException, ServletException {
+		public FormValidation doCheckName(@QueryParameter final String name) throws IOException {
 			if(StringUtils.isBlank(name)) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_NameCanNotBeEmpty());
 			}
 			return FormValidation.ok();
 		}
 		
-		public FormValidation doCheckPath(@QueryParameter final String path) throws IOException, ServletException {
+		public FormValidation doCheckPath(@QueryParameter final String path) throws IOException {
 			if(StringUtils.isBlank(path)) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathCanNotBeEmpty());
 			}
@@ -83,33 +82,24 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		}
 		
 		
-		public FormValidation doCheckIncludeRegex(@QueryParameter final String regexIncludePattern) throws IOException, ServletException {
-			if(StringUtils.isBlank(regexIncludePattern)) {
-				return FormValidation.ok();
-			}
+		public FormValidation doCheckRegexIncludePattern(@QueryParameter final String regexIncludePattern) {
+			return checkRegex(regexIncludePattern);
 			
-			try {
-				Pattern.compile(regexIncludePattern);
-			} catch (PatternSyntaxException e) {
-				return FormValidation.error(Messages.FileSystemListParameterDefinition_RegExPatternNotValid(), regexIncludePattern);
-			}
-			return FormValidation.ok();
+		}
+		public FormValidation doCheckRegexExcludePattern(@QueryParameter final String regexExcludePattern) {
+			return checkRegex(regexExcludePattern);
 			
 		}
 
-		public FormValidation doCheckExcludeRegex(@QueryParameter final String regexExcludePattern) throws IOException, ServletException {
-			if(StringUtils.isBlank(regexExcludePattern)) {
-				return FormValidation.ok();
-			}
-			
+		private FormValidation checkRegex(String regex) {
 			try {
-				Pattern.compile(regexExcludePattern);
-			} catch (PatternSyntaxException e) {
-				return FormValidation.error(Messages.FileSystemListParameterDefinition_RegExPatternNotValid(), regexExcludePattern);
+				Pattern.compile(regex);
+				return FormValidation.ok();
+			} catch (PatternSyntaxException pse) {
+				return FormValidation.error(Messages.FileSystemListParameterDefinition_RegExPatternNotValid(), regex, pse.getDescription());
 			}
-			return FormValidation.ok();
-			
 		}
+
 		
 	}
 
@@ -397,26 +387,21 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return path;
 	}
 
-
 	public String getSelectedType() {
 		return selectedType;
 	}
 
-	
 	public boolean isSortByLastModified() {
 		return sortByLastModified;
 	}
-
 
 	public boolean isSortReverseOrder() {
 		return sortReverseOrder;
 	}
 
-	
 	public FsObjectTypes getSelectedEnumType() {
 		return selectedEnumType;
 	}
-
 
 	public String getValue() {
 		return value;
