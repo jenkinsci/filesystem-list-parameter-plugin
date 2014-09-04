@@ -9,8 +9,8 @@
 		<f:textarea name="parameter.description" value="${instance.description}" codemirror-mode="${app.markupFormatter.codeMirrorMode}" codemirror-config="${app.markupFormatter.codeMirrorConfig}" previewEndpoint="/markupFormatter/previewDescription" />
 	</f:entry>
 
-	<f:entry title="Path" field="path">
-		<f:textbox />
+	<f:entry title="Path" field="path" >
+		<f:textbox default="" />
 	</f:entry>
 
 	<f:entry title="Filesystem object type" field="selectedType">

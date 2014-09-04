@@ -4,6 +4,7 @@
 package alex.jenkins.plugins;
 
 import hudson.Extension;
+import hudson.Util;
 import hudson.model.ParameterValue;
 import hudson.model.ParameterDefinition;
 import hudson.util.FormValidation;
@@ -21,6 +22,7 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 
 
 import net.sf.json.JSONArray;
@@ -129,7 +131,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	public FileSystemListParameterDefinition(String name, String description, String path, String selectedType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified, boolean sortReverseOrder) {
 		super(name, description);
 	
-		this.path = path;
+		this.path = Util.fixNull(path);
 		this.selectedType = selectedType;
 		this.selectedEnumType = FsObjectTypes.valueOf(selectedType);
 		this.sortByLastModified = sortByLastModified;
@@ -195,20 +197,23 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		
 		map = new TreeMap<String, Long>();
 		File rootDir = new File(path);
+		File[] listFiles = rootDir.listFiles();
 		
-		switch (getSelectedEnumType()) {
-		case SYMLINK:
-			createSymlinkMap(rootDir);
-			break;
-		case DIRECTORY:
-			createDirectoryMap(rootDir);
-			break;
-		case FILE:
-			createFileMap(rootDir);
-			break;
-		default:
-			createAllObjectsMap(rootDir);
-			break;
+		if(listFiles!=null){
+			switch (getSelectedEnumType()) {
+			case SYMLINK:
+				createSymlinkMap(listFiles);
+				break;
+			case DIRECTORY:
+				createDirectoryMap(listFiles);
+				break;
+			case FILE:
+				createFileMap(listFiles);
+				break;
+			default:
+				createAllObjectsMap(listFiles);
+				break;
+			}
 		}
 		
 
@@ -301,9 +306,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 		
-	private void createSymlinkMap(File rootDir) throws IOException {
+	private void createSymlinkMap(File[] listFiles) throws IOException {
 		
-		for (File file : rootDir.listFiles()) {
+		for (File file : listFiles) {
 			if (!file.isHidden() && isSymlink(file) && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
@@ -312,9 +317,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 
-	private void createDirectoryMap(File rootDir) throws IOException {
+	private void createDirectoryMap(File[] listFiles) throws IOException {
 		
-		for (File file : rootDir.listFiles()) {
+		for (File file : listFiles) {
 			if (!file.isHidden() && file.isDirectory() && !isSymlink(file) && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
@@ -323,9 +328,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 
-	private void createFileMap(File rootDir) throws IOException {
+	private void createFileMap(File[] listFiles) throws IOException {
 		
-		for (File file : rootDir.listFiles()) {
+		for (File file : listFiles) {
 			if (!file.isHidden() && file.isFile() && !isSymlink(file) && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
@@ -337,9 +342,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 
-	private void createAllObjectsMap(File rootDir) {
+	private void createAllObjectsMap(File[] listFiles) {
 		
-		for (File file : rootDir.listFiles()) {
+		for (File file : listFiles) {
 			if (!file.isHidden() && isPatternMatching(file.getName())) {
 				map.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
