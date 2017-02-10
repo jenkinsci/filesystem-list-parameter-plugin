@@ -15,7 +15,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -117,8 +116,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	private String value;
 
-	private Formatter formatter;
-
 	SortedMap<String, Long> map;
 	
 	
@@ -138,7 +135,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		this.sortReverseOrder = sortReverseOrder;
 		this.regexIncludePattern = regexIncludePattern;
 		this.regexExcludePattern = regexExcludePattern;
-		this.formatter = new Formatter();
 
 	}
 
@@ -175,7 +171,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		try {
 			defaultValue = getEffectiveDefaultValue();
 		} catch (IOException e) {
-			LOGGER.warning(formatter.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), defaultValue).toString());
+			LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), defaultValue).toString());
 		}
 		if(!StringUtils.isBlank(defaultValue)) {
 			return new FileSystemListParameterValue(getName(), defaultValue);
@@ -227,7 +223,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		
 		if (map.isEmpty()) {
 			list = new ArrayList<String>();
-			String msg = formatter.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(), getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(), getPath()).toString() ;
+			String msg = String.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(), getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(), getPath()).toString() ;
 			LOGGER.warning(msg);
 			list.add(msg);
 		}else {
