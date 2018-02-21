@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -74,8 +75,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			if(!dir.exists()) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
 			}
-						
-			if(dir.list().length == 0) {
+
+			String[] items = dir.list();
+			if(items == null || items.length == 0) {
 				return FormValidation.warning(Messages.FileSystemListParameterDefinition_NoObjectsFound(), path);
 			}
 			return FormValidation.ok();
@@ -258,9 +260,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			if (map.containsValue(value)) {
 
 				// key with lowest value will be added first
-				for (String key : map.keySet()) {
-					if (value == map.get(key)) {
-						list.add(key);
+				for (Map.Entry<String, Long> entry : map.entrySet()) {
+					if (value.equals(entry.getValue())) {
+						list.add(entry.getKey());
 					}
 				}
 			}
