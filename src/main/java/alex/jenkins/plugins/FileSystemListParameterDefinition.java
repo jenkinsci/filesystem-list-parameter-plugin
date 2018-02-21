@@ -218,7 +218,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 
-	List<String> sortList(Map<String, Long> map) {
+	 List<String> sortList(Map<String, Long> map) {
 		List<String> list;
 		
 		if (map.isEmpty()) {
@@ -241,11 +241,11 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		
 		return list;
 	}
-	
 
 
 
-	List<String> createTimeSortedList(Map<String, Long> map) {
+
+	static List<String> createTimeSortedList(Map<String, Long> map) {
 		List<String> list = new ArrayList<String>();
 		
 		Collection<Long> valuesC = map.values();
@@ -271,7 +271,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 
-	private boolean isSymlink(File file) throws IOException {
+	static private boolean isSymlink(File file) throws IOException {
 		if (file == null)
 			throw new NullPointerException("File must not be null");
 		File canon;
