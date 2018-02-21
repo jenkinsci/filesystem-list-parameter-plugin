@@ -117,8 +117,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private String regexExcludePattern;
 
 	private String value;
-
-	SortedMap<String, Long> map;
 	
 	
 	
@@ -192,35 +190,35 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 	public List<String> getFsObjectsList() throws IOException {
-		
-		map = new TreeMap<String, Long>();
+
+		TreeMap<String, Long> map = new TreeMap<>();
 		File rootDir = new File(path);
 		File[] listFiles = rootDir.listFiles();
 		
 		if(listFiles!=null){
 			switch (getSelectedEnumType()) {
 			case SYMLINK:
-				createSymlinkMap(listFiles);
+				createSymlinkMap(listFiles, map);
 				break;
 			case DIRECTORY:
-				createDirectoryMap(listFiles);
+				createDirectoryMap(listFiles, map);
 				break;
 			case FILE:
-				createFileMap(listFiles);
+				createFileMap(listFiles, map);
 				break;
 			default:
-				createAllObjectsMap(listFiles);
+				createAllObjectsMap(listFiles, map);
 				break;
 			}
 		}
 		
 
-		return sortList();
+		return sortList(map);
 	}
 
 
 
-	List<String> sortList() {
+	List<String> sortList(Map<String, Long> map) {
 		List<String> list;
 		
 		if (map.isEmpty()) {
@@ -231,7 +229,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		}else {
 			// Sorting:
 			if (isSortByLastModified()) {
-				list = createTimeSortedList();
+				list = createTimeSortedList(map);
 			}else {
 				list = new ArrayList<String>();
 				list.addAll(map.keySet());
@@ -247,7 +245,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 
-	List<String> createTimeSortedList() {
+	List<String> createTimeSortedList(Map<String, Long> map) {
 		List<String> list = new ArrayList<String>();
 		
 		Collection<Long> valuesC = map.values();
@@ -304,33 +302,33 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 		
-	private void createSymlinkMap(File[] listFiles) throws IOException {
+	private void createSymlinkMap(File[] listFiles, Map<String, Long> target) throws IOException {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && isSymlink(file) && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
 	}
 
 
-	private void createDirectoryMap(File[] listFiles) throws IOException {
+	private void createDirectoryMap(File[] listFiles, Map<String, Long> target) throws IOException {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && file.isDirectory() && !isSymlink(file) && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
 	}
 
 
-	private void createFileMap(File[] listFiles) throws IOException {
+	private void createFileMap(File[] listFiles, Map<String, Long> target) throws IOException {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && file.isFile() && !isSymlink(file) && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
@@ -340,11 +338,11 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 
-	private void createAllObjectsMap(File[] listFiles) {
+	private void createAllObjectsMap(File[] listFiles, Map<String, Long> target) {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
