@@ -15,8 +15,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -75,8 +75,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			if(!dir.exists()) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
 			}
-						
-			if(dir.list().length == 0) {
+
+			String[] items = dir.list();
+			if(items == null || items.length == 0) {
 				return FormValidation.warning(Messages.FileSystemListParameterDefinition_NoObjectsFound(), path);
 			}
 			return FormValidation.ok();
@@ -116,10 +117,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private String regexExcludePattern;
 
 	private String value;
-
-	private Formatter formatter;
-
-	SortedMap<String, Long> map;
 	
 	
 	
@@ -138,7 +135,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		this.sortReverseOrder = sortReverseOrder;
 		this.regexIncludePattern = regexIncludePattern;
 		this.regexExcludePattern = regexExcludePattern;
-		this.formatter = new Formatter();
 
 	}
 
@@ -175,7 +171,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		try {
 			defaultValue = getEffectiveDefaultValue();
 		} catch (IOException e) {
-			LOGGER.warning(formatter.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), defaultValue).toString());
+			LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), defaultValue).toString());
 		}
 		if(!StringUtils.isBlank(defaultValue)) {
 			return new FileSystemListParameterValue(getName(), defaultValue);
@@ -194,46 +190,46 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 	public List<String> getFsObjectsList() throws IOException {
-		
-		map = new TreeMap<String, Long>();
+
+		TreeMap<String, Long> map = new TreeMap<>();
 		File rootDir = new File(path);
 		File[] listFiles = rootDir.listFiles();
 		
 		if(listFiles!=null){
 			switch (getSelectedEnumType()) {
 			case SYMLINK:
-				createSymlinkMap(listFiles);
+				createSymlinkMap(listFiles, map);
 				break;
 			case DIRECTORY:
-				createDirectoryMap(listFiles);
+				createDirectoryMap(listFiles, map);
 				break;
 			case FILE:
-				createFileMap(listFiles);
+				createFileMap(listFiles, map);
 				break;
 			default:
-				createAllObjectsMap(listFiles);
+				createAllObjectsMap(listFiles, map);
 				break;
 			}
 		}
 		
 
-		return sortList();
+		return sortList(map);
 	}
 
 
 
-	List<String> sortList() {
+	 List<String> sortList(Map<String, Long> map) {
 		List<String> list;
 		
 		if (map.isEmpty()) {
 			list = new ArrayList<String>();
-			String msg = formatter.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(), getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(), getPath()).toString() ;
+			String msg = String.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(), getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(), getPath()).toString() ;
 			LOGGER.warning(msg);
 			list.add(msg);
 		}else {
 			// Sorting:
 			if (isSortByLastModified()) {
-				list = createTimeSortedList();
+				list = createTimeSortedList(map);
 			}else {
 				list = new ArrayList<String>();
 				list.addAll(map.keySet());
@@ -245,11 +241,11 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		
 		return list;
 	}
-	
 
 
 
-	List<String> createTimeSortedList() {
+
+	static List<String> createTimeSortedList(Map<String, Long> map) {
 		List<String> list = new ArrayList<String>();
 		
 		Collection<Long> valuesC = map.values();
@@ -262,9 +258,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			if (map.containsValue(value)) {
 
 				// key with lowest value will be added first
-				for (String key : map.keySet()) {
-					if (value == map.get(key)) {
-						list.add(key);
+				for (Map.Entry<String, Long> entry : map.entrySet()) {
+					if (value.equals(entry.getValue())) {
+						list.add(entry.getKey());
 					}
 				}
 			}
@@ -275,7 +271,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 
-	private boolean isSymlink(File file) throws IOException {
+	static private boolean isSymlink(File file) throws IOException {
 		if (file == null)
 			throw new NullPointerException("File must not be null");
 		File canon;
@@ -306,33 +302,33 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 		
-	private void createSymlinkMap(File[] listFiles) throws IOException {
+	private void createSymlinkMap(File[] listFiles, Map<String, Long> target) throws IOException {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && isSymlink(file) && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
 	}
 
 
-	private void createDirectoryMap(File[] listFiles) throws IOException {
+	private void createDirectoryMap(File[] listFiles, Map<String, Long> target) throws IOException {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && file.isDirectory() && !isSymlink(file) && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
 	}
 
 
-	private void createFileMap(File[] listFiles) throws IOException {
+	private void createFileMap(File[] listFiles, Map<String, Long> target) throws IOException {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && file.isFile() && !isSymlink(file) && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
@@ -342,11 +338,11 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 
 
-	private void createAllObjectsMap(File[] listFiles) {
+	private void createAllObjectsMap(File[] listFiles, Map<String, Long> target) {
 		
 		for (File file : listFiles) {
 			if (!file.isHidden() && isPatternMatching(file.getName())) {
-				map.put(file.getName(),file.lastModified());
+				target.put(file.getName(),file.lastModified());
 				LOGGER.finest("add " + file);
 			}
 		}
