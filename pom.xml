@@ -8,7 +8,7 @@
 
 	<groupId>aendter.jenkins.plugins</groupId>
 	<artifactId>filesystem-list-parameter-plugin</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 
 	<name>Jenkins Filesystem List Parameter Plug-in</name>
@@ -29,8 +29,8 @@
   </licenses>
   
   <scm>
-    <connection>scm:git:ssh://github.com/jenkinsci/filesystem-list-parameter-plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/filesystem-list-parameter-plugin.git</developerConnection>
+    <connection>scm:git:https://github.com/jenkinsci/filesystem-list-parameter-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/jenkinsci/filesystem-list-parameter-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/filesystem-list-parameter-plugin</url>
     <tag>filesystem-list-parameter-plugin-0.0.4</tag>
   </scm>
