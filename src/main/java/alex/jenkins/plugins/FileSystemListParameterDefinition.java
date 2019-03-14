@@ -3,12 +3,6 @@
  */
 package alex.jenkins.plugins;
 
-import hudson.Extension;
-import hudson.Util;
-import hudson.model.ParameterValue;
-import hudson.model.ParameterDefinition;
-import hudson.util.FormValidation;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,21 +11,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import hudson.Extension;
+import hudson.Util;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
+import hudson.util.FormValidation;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 
 

@@ -1,14 +1,11 @@
 package alex.jenkins.plugins;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.TreeMap;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RegexFilterTest {
