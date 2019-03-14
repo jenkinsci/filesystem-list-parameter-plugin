@@ -21,7 +21,7 @@ public class RegexFilterTest {
 	}
 	
 	@Test
-	public void testRegexEmptyFilter() throws IOException {
+	public void testRegexEmptyFilter() throws Exception {
 		boolean sortByLastModified = false;
 		boolean sortReverseOrder = false;
 		String includePattern = "";
@@ -36,7 +36,7 @@ public class RegexFilterTest {
 	
 	
 	@Test
-	public void testRegexFilterNotfound() throws IOException {
+	public void testRegexFilterNotfound() throws Exception {
 		boolean sortByLastModified = false;
 		boolean sortReverseOrder = false;
 		String includePattern = "notFound";
@@ -52,7 +52,7 @@ public class RegexFilterTest {
 	
 	
 	@Test
-	public void testRegexIncludeFilter() throws IOException {
+	public void testRegexIncludeFilter() throws Exception {
 		boolean sortByLastModified = false;
 		boolean sortReverseOrder = false;
 		String includePattern = "[\\w]*3[.]txt";
@@ -69,7 +69,7 @@ public class RegexFilterTest {
 
 	
 	@Test
-	public void testRegexExcludeFilter() throws IOException {
+	public void testRegexExcludeFilter() throws Exception {
 		boolean sortByLastModified = false;
 		boolean sortReverseOrder = false;
 		String includePattern = "";
