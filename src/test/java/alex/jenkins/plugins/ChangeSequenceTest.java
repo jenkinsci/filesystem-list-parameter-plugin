@@ -11,8 +11,8 @@ public class ChangeSequenceTest {
 	
 	@Test
 	public void testSorting() {
-		boolean sortByLastModified = true;
-		boolean sortReverseOrder = false;
+		//boolean sortByLastModified = true;
+		//boolean sortReverseOrder = false;
 
 		TreeMap<String, Long> map = new TreeMap<>();
 		String test1 = "test1";
