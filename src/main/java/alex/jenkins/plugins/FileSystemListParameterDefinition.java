@@ -393,33 +393,19 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	/*
 	 * Creates list to display in config.jelly
 	 */
-	public List<String> getJellyNodeNames() {
+	public static List<String> getNodeNames() {
 		ArrayList<String> list = new ArrayList<String>();
-		final String selected = getNodeName();
 		final List<Node> nodes = Jenkins.getInstance().getNodes();
 
-		LOGGER.finest("# selectedType=" + selected);
-
-		if (selected.equals("")) {
+			// add master
+			list.add(MASTER);
 			for (Node node : nodes) {
-				final String nodeName = node.getNodeName();
+				String nodeName = node.getNodeName();
 				if (StringUtils.isNotBlank(nodeName)) {
 					LOGGER.finest("# add " + nodeName);
 					list.add(nodeName);
 				}
 			}
-
-		} else {
-			LOGGER.finest("# add " + selected);
-			list.add(selected);
-			for (Node label : nodes) {
-				final String nodeName = label.getNodeName();
-				if (StringUtils.isNotBlank(nodeName) && !selected.equals(nodeName)) {
-					LOGGER.finest("# add " + nodeName);
-					list.add(nodeName);
-				}
-			}
-		}
 
 		return list;
 	}
