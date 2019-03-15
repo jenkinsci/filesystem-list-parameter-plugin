@@ -11,22 +11,19 @@
 	</f:entry>
 	
 	<f:entry title="NodeName" field="nodeName">
-	  <j:choose>
-        <j:when test="${instance.selectedType==null}">
-	      <select name="nodeName">
-	        <j:forEach var="xNode" items="${instance.jellyNodeNames}">
-	          <f:option>${xNode}</f:option>
-	        </j:forEach>
-	      </select>
-        </j:when>
-        <j:otherwise>
-	      <select name="nodeName">
-	        <j:forEach var="xNode" items="${instance.jellyNodeNames}">
-	          <f:option>${xNode}</f:option>
-	        </j:forEach>
-	      </select>
-		</j:otherwise>
-      </j:choose>
+      <select name="nodeName" >
+        <j:invokeStatic className="alex.jenkins.plugins.FileSystemListParameterDefinition" method="getNodeNames" var="nodeList" />
+        <j:forEach var="node" items="${nodeList}" varStatus="loop">
+            <j:choose>
+                <j:when test="${instance.nodeName.equals(node)}">
+                    <option value="${node}" selected="selected">${node}</option>
+                </j:when>
+                <j:otherwise>
+                    <option value="${node}">${node}</option>
+                </j:otherwise>
+            </j:choose>
+        </j:forEach>
+	  </select>
 	</f:entry>
 
 	<f:entry title="Path" field="path" >
