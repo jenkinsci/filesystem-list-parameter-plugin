@@ -5,7 +5,6 @@ package alex.jenkins.plugins;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +26,7 @@ import hudson.FilePath;
 import hudson.FilePath.FileCallable;
 import hudson.Util;
 import hudson.model.Computer;
+import hudson.model.Node;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.remoting.VirtualChannel;
@@ -44,6 +44,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private static final long serialVersionUID = 9032072543915872650L;
 
 	private static final Logger LOGGER = Logger.getLogger(FileSystemListParameterDefinition.class.getName());
+	
+    public static final String MASTER = "master";
 
 	public static enum FsObjectTypes implements java.io.Serializable {
 		ALL, DIRECTORY, FILE, SYMLINK
@@ -103,7 +105,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	}
 
-	private String slaveAgentName;
+
+	private String nodeName;
 	private String path;
 	private String selectedType;
 	private boolean sortByLastModified;
@@ -111,7 +114,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private FsObjectTypes selectedEnumType;
 	private String regexIncludePattern;
 	private String regexExcludePattern;
-
 	private String value;
 
 	/**
@@ -119,11 +121,12 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	 * @param description
 	 */
 	@DataBoundConstructor
-	public FileSystemListParameterDefinition(String name, String description, String path, String selectedType,
+	public FileSystemListParameterDefinition(String name, String description, String nodeName, String path, String selectedType,
 			String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
 			boolean sortReverseOrder) {
 		super(name, description);
 
+		this.nodeName = nodeName;
 		this.path = Util.fixNull(path);
 		this.selectedType = selectedType;
 		this.selectedEnumType = FsObjectTypes.valueOf(selectedType);
@@ -185,8 +188,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		Computer computer = null;
 		VirtualChannel channel = null;
 		Jenkins instance = Jenkins.getInstance();
-		if (slaveAgentName != null && !slaveAgentName.trim().isEmpty() && instance != null) {
-			computer = instance.getComputer(slaveAgentName);
+		if (getNodeName() != null && !getNodeName().trim().isEmpty() && instance != null) {
+			computer = instance.getComputer(getNodeName());
 			if (computer != null) {
 				channel = computer.getChannel();
 			}
@@ -385,6 +388,52 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 		return list;
 	}
+	
+	
+	/*
+	 * Creates list to display in config.jelly
+	 */
+	public List<String> getJellyNodeNames() {
+		ArrayList<String> list = new ArrayList<String>();
+		final String selected = getNodeName();
+		final List<Node> nodes = Jenkins.getInstance().getNodes();
+
+		LOGGER.finest("# selectedType=" + selected);
+
+		if (selected.equals("")) {
+			for (Node node : nodes) {
+				final String nodeName = node.getNodeName();
+				if (StringUtils.isNotBlank(nodeName)) {
+					LOGGER.finest("# add " + nodeName);
+					list.add(nodeName);
+				}
+			}
+
+		} else {
+			LOGGER.finest("# add " + selected);
+			list.add(selected);
+			for (Node label : nodes) {
+				final String nodeName = label.getNodeName();
+				if (StringUtils.isNotBlank(nodeName) && !selected.equals(nodeName)) {
+					LOGGER.finest("# add " + nodeName);
+					list.add(nodeName);
+				}
+			}
+		}
+
+		return list;
+	}
+	
+
+	
+	
+	
+
+
+
+
+
+    
 
 	public String getPath() {
 		return path;
@@ -420,6 +469,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	public String getRegexExcludePattern() {
 		return regexExcludePattern;
+	}
+
+	public String getNodeName() {
+		return nodeName;
 	}
 
 }
