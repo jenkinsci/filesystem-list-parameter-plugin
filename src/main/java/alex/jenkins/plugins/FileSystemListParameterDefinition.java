@@ -194,6 +194,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 				channel = computer.getChannel();
 			}
 		}
+		
+		
 		FilePath rootPath = new FilePath(channel, path);
 		class FilesLister implements FileCallable<List<String>> {
 
