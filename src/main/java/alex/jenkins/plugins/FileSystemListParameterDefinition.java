@@ -65,21 +65,51 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			return FormValidation.ok();
 		}
 
-		public FormValidation doCheckPath(@QueryParameter final String path) throws IOException {
+		public FormValidation doCheckPath(@QueryParameter final String path, @QueryParameter final String nodeName) throws IOException, InterruptedException {
 			if (StringUtils.isBlank(path)) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathCanNotBeEmpty());
 			}
 
-			File dir = new File(path);
-			if (!dir.exists()) {
-				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
-			}
+			Jenkins instance = Jenkins.getInstance();
+			Computer computer = null;
+			VirtualChannel channel = null;
+			
+			
+			if (nodeName==null || nodeName.equals(MASTER)) {
+				File dir = new File(path);
+				if (!dir.exists()) {
+					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
+				}
+				
+				String[] items = dir.list();
+				if (items == null || items.length == 0) {
+					return FormValidation.warning(Messages.FileSystemListParameterDefinition_NoObjectsFound(), path);
+				}
+				return FormValidation.ok();
+				
+			} else {
+				
+				
+				if (!nodeName.trim().isEmpty() && instance != null) {
+					computer = instance.getComputer(nodeName);
+					if (computer != null) {
+						channel = computer.getChannel();
+					}
+				}
 
-			String[] items = dir.list();
-			if (items == null || items.length == 0) {
-				return FormValidation.warning(Messages.FileSystemListParameterDefinition_NoObjectsFound(), path);
+				
+				FilePath filepath = new FilePath(channel, path);
+				if (!filepath.exists()) {
+					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
+				}
+				
+				List<FilePath> list = filepath.list();
+				if (list.isEmpty()) {
+					return FormValidation.warning(Messages.FileSystemListParameterDefinition_NoObjectsFound(), path);
+				}
+				return FormValidation.ok();
+
 			}
-			return FormValidation.ok();
 
 		}
 
