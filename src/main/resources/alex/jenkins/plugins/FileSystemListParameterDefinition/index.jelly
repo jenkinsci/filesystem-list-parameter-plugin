@@ -4,13 +4,24 @@
   xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
   <f:entry title="${it.name}" description="${it.description}" >
   	<div name="parameter" description="${it.description}" >
-      <input type="hidden" name="name" value="${it.name}"/>
-      <select name="value">
-        <j:forEach var="fsObj" items="${it.fsObjectsList}">
-			<f:option value="${fsObj}">${fsObj}</f:option>
-        </j:forEach>
-      </select>
+    <j:choose>
+      <j:when test="${it.formSelectType eq 'SINGLE_SELECT'}">
+        <input type="hidden" name="name" value="${it.name}"/>
+        <select name="value">
+            <j:forEach var="fsObj" items="${it.fsObjectsList}">
+                <f:option value="${fsObj}">${fsObj}</f:option>
+            </j:forEach>
+	    </select>
+	  </j:when>
+      <j:when test="${it.formSelectType eq 'MULTI_SELECT'}">
+	        <input type="hidden" name="name" value="${it.name}"/>
+            <select name="value" size="10" multiple="multiple" width="200px">
+                <j:forEach var="fsObj" items="${it.fsObjectsList}">
+                    <f:option value="${fsObj}">${fsObj}</f:option>
+                </j:forEach>
+      	  </select>
+	  </j:when>
+    </j:choose>
      </div>
   </f:entry>
-  
 </j:jelly>

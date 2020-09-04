@@ -25,7 +25,7 @@ public class RegexFilterTest {
 		boolean sortReverseOrder = false;
 		String includePattern = "";
 		String excludePattern = "";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
 
 		List<String> list = pd.getFsObjectsList();
 		
@@ -40,7 +40,7 @@ public class RegexFilterTest {
 		boolean sortReverseOrder = false;
 		String includePattern = "notFound";
 		String excludePattern = "";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
 		
 		List<String> list = pd.getFsObjectsList();
 		
@@ -56,7 +56,7 @@ public class RegexFilterTest {
 		boolean sortReverseOrder = false;
 		String includePattern = "[\\w]*3[.]txt";
 		String excludePattern = "";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
 		
 		List<String> list = pd.getFsObjectsList();
 		
@@ -73,7 +73,7 @@ public class RegexFilterTest {
 		boolean sortReverseOrder = false;
 		String includePattern = "";
 		String excludePattern = "[\\w]*3[.]txt";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder);
 		
 		List<String> list = pd.getFsObjectsList();
 		
