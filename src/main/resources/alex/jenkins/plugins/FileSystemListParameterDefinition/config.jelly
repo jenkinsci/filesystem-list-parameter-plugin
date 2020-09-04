@@ -50,6 +50,24 @@
       </j:choose>
 	</f:entry>
 
+	<f:entry title="Form select type" field="formSelectType">
+	  <j:choose>
+        <j:when test="${instance.formSelectType==null}">
+	      <select name="formSelectType">
+			<option value="SINGLE_SELECT">SINGLE_SELECT</option>
+			<option value="MULTI_SELECT">MULTI_SELECT</option>
+	      </select>
+        </j:when>
+        <j:otherwise>
+	      <select name="formSelectType">
+	        <j:forEach var="sType" items="${instance.jellyFsFormSelectTypes}">
+	          <f:option>${sType}</f:option>
+	        </j:forEach>
+	      </select>
+		</j:otherwise>
+	  </j:choose>
+	</f:entry>
+
 	<f:entry title="Include Pattern" field="regexIncludePattern">
 		<f:textbox default="" />
 	</f:entry>

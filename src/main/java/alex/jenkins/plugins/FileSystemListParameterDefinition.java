@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package alex.jenkins.plugins;
 
@@ -44,11 +44,15 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private static final long serialVersionUID = 9032072543915872650L;
 
 	private static final Logger LOGGER = Logger.getLogger(FileSystemListParameterDefinition.class.getName());
-	
+
     public static final String MASTER = "master";
 
 	public static enum FsObjectTypes implements java.io.Serializable {
 		ALL, DIRECTORY, FILE, SYMLINK
+	}
+
+	public static enum FsSelectTypes  implements java.io.Serializable {
+		SINGLE_SELECT, MULTI_SELECT
 	}
 
 	@Extension
@@ -73,23 +77,23 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			Jenkins instance = Jenkins.getInstance();
 			Computer computer = null;
 			VirtualChannel channel = null;
-			
-			
+
+
 			if (nodeName==null || nodeName.equals(MASTER)) {
 				File dir = new File(path);
 				if (!dir.exists()) {
 					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
 				}
-				
+
 				String[] items = dir.list();
 				if (items == null || items.length == 0) {
 					return FormValidation.warning(Messages.FileSystemListParameterDefinition_NoObjectsFound(), path);
 				}
 				return FormValidation.ok();
-				
+
 			} else {
-				
-				
+
+
 				if (!nodeName.trim().isEmpty() && instance != null) {
 					computer = instance.getComputer(nodeName);
 					if (computer != null) {
@@ -97,12 +101,12 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 					}
 				}
 
-				
+
 				FilePath filepath = new FilePath(channel, path);
 				if (!filepath.exists()) {
 					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
 				}
-				
+
 				List<FilePath> list = filepath.list();
 				if (list.isEmpty()) {
 					return FormValidation.warning(Messages.FileSystemListParameterDefinition_NoObjectsFound(), path);
@@ -139,6 +143,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private String nodeName;
 	private String path;
 	private String selectedType;
+	private String formSelectType;
 	private boolean sortByLastModified;
 	private boolean sortReverseOrder;
 	private FsObjectTypes selectedEnumType;
@@ -152,13 +157,14 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	 */
 	@DataBoundConstructor
 	public FileSystemListParameterDefinition(String name, String description, String nodeName, String path, String selectedType,
-			String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
+			String formSelectType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
 			boolean sortReverseOrder) {
 		super(name, description);
 
 		this.nodeName = nodeName;
 		this.path = Util.fixNull(path);
 		this.selectedType = selectedType;
+		this.formSelectType = formSelectType;
 		this.selectedEnumType = FsObjectTypes.valueOf(selectedType);
 		this.sortByLastModified = sortByLastModified;
 		this.sortReverseOrder = sortReverseOrder;
@@ -224,8 +230,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 				channel = computer.getChannel();
 			}
 		}
-		
-		
+
+
 		FilePath rootPath = new FilePath(channel, path);
 		class FilesLister implements FileCallable<List<String>> {
 
@@ -388,7 +394,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			}
 		}
 	}
-
 	/*
 	 * Creates list to display in config.jelly
 	 */
@@ -420,8 +425,34 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 		return list;
 	}
-	
-	
+
+	/*
+	 * Creates list of Select Types to display in config.jelly
+	 */
+	public List<String> getJellyFsFormSelectTypes() {
+		ArrayList<String> list = new ArrayList<String>();
+		String selected = getFormSelectType();
+
+		LOGGER.finest("# formSelectType=" + selected);
+
+		if (selected.equals("")) {
+			for (FsSelectTypes type : FsSelectTypes.values()) {
+				LOGGER.finest("# add " + type.toString());
+				list.add(type.toString());
+			}
+		} else {
+			LOGGER.finest("# add " + selected);
+			list.add(selected);
+			for (FsSelectTypes type : FsSelectTypes.values()) {
+				if (!selected.equals(type.toString())) {
+					LOGGER.finest("# add " + type.toString());
+					list.add(type.toString());
+				}
+			}
+		}
+		return list;
+	}
+
 	/*
 	 * Creates list to display in config.jelly
 	 */
@@ -441,17 +472,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 		return list;
 	}
-	
 
-	
-	
-	
-
-
-
-
-
-    
 
 	public String getPath() {
 		return path;
@@ -471,6 +492,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	public FsObjectTypes getSelectedEnumType() {
 		return selectedEnumType;
+	}
+
+	public String getFormSelectType() {
+		return formSelectType;
 	}
 
 	public String getValue() {

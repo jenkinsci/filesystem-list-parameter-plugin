@@ -18,7 +18,7 @@ public class FileSystemListParameterDefinitionTest {
     @Issue("JENKINS-49649")
     public void smokeRoundtrip() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
-        FileSystemListParameterDefinition d = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE", "", "", true, false);
+        FileSystemListParameterDefinition d = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE","SINGLE_SELECT", "", "", true, false);
         ParametersDefinitionProperty params = new ParametersDefinitionProperty(d);
         p.addProperty(params);
 
