@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>3.40</version>
+		<version>4.16</version>
 	</parent>
 
 	<groupId>aendter.jenkins.plugins</groupId>
@@ -17,8 +17,8 @@
   	</description>
 
 	<properties>
-		<jenkins.version>2.7.3</jenkins.version>
-		<java.level>7</java.level>
+		<jenkins.version>2.277.1</jenkins.version>
+		<java.level>8</java.level>
 	</properties>
 
 	<licenses>
@@ -27,42 +27,6 @@
 			<comments>All source code is under the Apache License.</comments>
 		</license>
 	</licenses>
-
-	<build>
-
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>aspectj-maven-plugin</artifactId>
-										<versionRange>[1.0,)</versionRange>
-										<goals>
-											<goal>test-compile</goal>
-											<goal>compile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-
-	</build>
 
 	<scm>
 		<connection>scm:git:https://github.com/jenkinsci/filesystem-list-parameter-plugin.git</connection>
@@ -102,13 +66,8 @@
 		<dependency>
 			<groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
 			<artifactId>rebuild</artifactId>
-			<version>1.31</version>
+			<version>1.32</version>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
-			<artifactId>matrix-project</artifactId>
-			<version>1.12</version>
 		</dependency>
 	</dependencies>
 

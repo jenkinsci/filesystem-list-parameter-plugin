@@ -10,6 +10,11 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.7 (March 18, 2021)
+
+-   Merge PullRequest:
+    [Added multi select option](https://github.com/jenkinsci/filesystem-list-parameter-plugin/pull/5)
+
 ##### Version 0.0.6 (February 16, 2020)
 
 -   Small bugfix - Rebuild issue
