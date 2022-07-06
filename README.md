@@ -10,6 +10,11 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.8 (July 06, 2022)
+
+-   Security issue:
+    [SECURITY-2716 - Stored XSS vulnerability](https://issues.jenkins.io/browse/SECURITY-2716)
+
 ##### Version 0.0.7 (March 18, 2021)
 
 -   Merge PullRequest:
