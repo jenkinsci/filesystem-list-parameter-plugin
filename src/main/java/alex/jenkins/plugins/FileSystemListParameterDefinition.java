@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -55,7 +56,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		SINGLE_SELECT, MULTI_SELECT
 	}
 
-	@Extension
+	@Extension @Symbol("fileSystemList")
 	public static class DescriptorImpl extends ParameterDescriptor {
 		@Override
 		public String getDisplayName() {
