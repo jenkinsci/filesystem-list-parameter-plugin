@@ -84,4 +84,7 @@
 		<f:checkbox checked="${instance.sortReverseOrder}"/>
 	</f:entry>
 
+    <f:entry title="Include path in value" field="includePathInValue">
+        <f:checkbox checked="${instance.includePathInValue}"/>
+    </f:entry>
 </j:jelly>
