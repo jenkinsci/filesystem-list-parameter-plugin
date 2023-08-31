@@ -35,7 +35,8 @@ public class ChangeSequenceTest {
 	public void testReverseOrder() {
 		boolean sortByLastModified = true;
 		boolean sortReverseOrder = true;
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder);
+        boolean includePathInValue = false;
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder, includePathInValue);
 
 		TreeMap<String, Long> map = new TreeMap<>();
 		String test1 = "test1";
@@ -58,7 +59,8 @@ public class ChangeSequenceTest {
 	public void testAlphabeticOrder() {
 		boolean sortByLastModified = false;
 		boolean sortReverseOrder = false;
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder);
+        boolean includePathInValue = false;
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder, includePathInValue);
 
 		TreeMap<String, Long> map = new TreeMap<>();
 		String test1 = "test1";
