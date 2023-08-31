@@ -65,6 +65,8 @@ The order of the list can be reversed.
     is alphabetic sort by parameter value.
 -   **Sort in reverse order** - If true, the list of the parameter
     values will be sorted in reverse order.
+-   **includePathInValue** - If true, the path will be prepended to the 
+    value(s).
 
 
 # Purpose
