@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -55,7 +56,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		SINGLE_SELECT, MULTI_SELECT
 	}
 
-	@Extension
+	@Extension @Symbol("fileSystemList")
 	public static class DescriptorImpl extends ParameterDescriptor {
 		@Override
 		public String getDisplayName() {
@@ -74,7 +75,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathCanNotBeEmpty());
 			}
 
-			Jenkins instance = Jenkins.getInstance();
+			Jenkins instance = Jenkins.get();
 			Computer computer = null;
 			VirtualChannel channel = null;
 
@@ -150,6 +151,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private String regexIncludePattern;
 	private String regexExcludePattern;
 	private String value;
+    private boolean includePathInValue;
 
 	/**
 	 * @param name
@@ -158,8 +160,11 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	@DataBoundConstructor
 	public FileSystemListParameterDefinition(String name, String description, String nodeName, String path, String selectedType,
 			String formSelectType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
-			boolean sortReverseOrder) {
-		super(name, description);
+			boolean sortReverseOrder, boolean includePathInValue) {
+
+        super(name);
+
+        super.setDescription(description);
 
 		this.nodeName = nodeName;
 		this.path = Util.fixNull(path);
@@ -170,7 +175,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		this.sortReverseOrder = sortReverseOrder;
 		this.regexIncludePattern = regexIncludePattern;
 		this.regexExcludePattern = regexExcludePattern;
-
+        this.includePathInValue = includePathInValue;
 	}
 
 	@Override
@@ -187,12 +192,17 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		Object value = jO.get("value");
 		String strValue = "";
 		if (value instanceof String) {
-			strValue = (String) value;
+            strValue = this.includePathInValue ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value);
 		} else if (value instanceof JSONArray) {
 			JSONArray jsonValues = (JSONArray) value;
-			strValue = StringUtils.join(jsonValues.iterator(), ',');
+            strValue = StringUtils.join(
+                    this.includePathInValue ? jsonValues.stream()
+                                                        .filter(e -> !StringUtils.isBlank(String.valueOf(e)))
+                                                        .map(e -> new File(this.path, String.valueOf(e)).getPath()).iterator()
+                                            : jsonValues.iterator(), 
+                    ','
+            );
 		}
-
 		return new FileSystemListParameterValue(getName(), strValue);
 	}
 
@@ -207,7 +217,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 					String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), defaultValue));
 		}
 		if (!StringUtils.isBlank(defaultValue)) {
-			return new FileSystemListParameterValue(getName(), defaultValue);
+            return new FileSystemListParameterValue(
+                getName(), 
+                this.includePathInValue ? new File(this.path, defaultValue).getPath() : defaultValue
+            );
 		}
 		return super.getDefaultParameterValue();
 	}
@@ -223,7 +236,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 		Computer computer = null;
 		VirtualChannel channel = null;
-		Jenkins instance = Jenkins.getInstance();
+		Jenkins instance = Jenkins.getInstanceOrNull();
 		if (getNodeName() != null && !getNodeName().trim().isEmpty() && instance != null) {
 			computer = instance.getComputer(getNodeName());
 			if (computer != null) {
@@ -458,7 +471,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	 */
 	public static List<String> getNodeNames() {
 		ArrayList<String> list = new ArrayList<String>();
-		final List<Node> nodes = Jenkins.getInstance().getNodes();
+		final List<Node> nodes = Jenkins.get().getNodes();
 
 			// add master
 			list.add(MASTER);
