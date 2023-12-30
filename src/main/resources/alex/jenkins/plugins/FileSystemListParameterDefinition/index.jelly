@@ -1,27 +1,34 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-  xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
-  xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
-  <f:entry title="${it.name}" description="${it.description}" >
-  	<div name="parameter" description="${it.description}" >
-    <j:choose>
-      <j:when test="${it.formSelectType eq 'SINGLE_SELECT'}">
-        <input type="hidden" name="name" value="${it.name}"/>
-        <select name="value">
-            <j:forEach var="fsObj" items="${it.fsObjectsList}">
-                <f:option value="${fsObj}">${fsObj}</f:option>
-            </j:forEach>
-	    </select>
-	  </j:when>
-      <j:when test="${it.formSelectType eq 'MULTI_SELECT'}">
-	        <input type="hidden" name="name" value="${it.name}"/>
-            <select name="value" size="10" multiple="multiple" width="200px">
-                <j:forEach var="fsObj" items="${it.fsObjectsList}">
-                    <f:option value="${fsObj}">${fsObj}</f:option>
-                </j:forEach>
-      	  </select>
-	  </j:when>
-    </j:choose>
-     </div>
-  </f:entry>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+	xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
+	<f:entry title="${it.name}" description="${it.description}">
+		<div name="parameter" description="${it.description}">
+			<j:choose>
+				<j:when test="${it.formSelectType eq 'SINGLE_SELECT'}">
+					<input type="hidden" name="name" value="${it.name}" />
+					<select name="value">
+						<j:forEach var="fsObj" items="${it.fsObjectsList}">
+							<f:option value="${fsObj}"
+								selected="${fsObj.equals(it.defaultValue)}">
+								${fsObj}
+							</f:option>
+						</j:forEach>
+					</select>
+				</j:when>
+				<j:when test="${it.formSelectType eq 'MULTI_SELECT'}">
+					<input type="hidden" name="name" value="${it.name}" />
+					<select name="value" size="10" multiple="multiple"
+						width="200px">
+						<j:forEach var="fsObj" items="${it.fsObjectsList}">
+							<f:option value="${fsObj}"
+								selected="${fsObj.equals(it.defaultValue)}">
+								${fsObj}
+							</f:option>
+						</j:forEach>
+					</select>
+				</j:when>
+			</j:choose>
+		</div>
+	</f:entry>
 </j:jelly>

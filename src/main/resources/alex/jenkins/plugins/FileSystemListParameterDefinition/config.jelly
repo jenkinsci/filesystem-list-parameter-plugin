@@ -68,6 +68,10 @@
 	  </j:choose>
 	</f:entry>
 
+  <f:entry title="Default Value (Only one value supported, yet.)" field="defaultValue">
+    <f:textbox default="" />
+  </f:entry> 
+
 	<f:entry title="Include Pattern" field="regexIncludePattern">
 		<f:textbox default="" />
 	</f:entry>

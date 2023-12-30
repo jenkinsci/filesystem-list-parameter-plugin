@@ -151,6 +151,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private String regexIncludePattern;
 	private String regexExcludePattern;
 	private String value;
+	private String defaultValue;
     private boolean includePathInValue;
 
 	/**
@@ -158,7 +159,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	 * @param description
 	 */
 	@DataBoundConstructor
-	public FileSystemListParameterDefinition(String name, String description, String nodeName, String path, String selectedType,
+	public FileSystemListParameterDefinition(String name, String description, String nodeName, String path, String defaultValue, String selectedType,
 			String formSelectType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
 			boolean sortReverseOrder, boolean includePathInValue) {
 
@@ -168,6 +169,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 		this.nodeName = nodeName;
 		this.path = Util.fixNull(path);
+		this.defaultValue = defaultValue;
 		this.selectedType = selectedType;
 		this.formSelectType = formSelectType;
 		this.selectedEnumType = FsObjectTypes.valueOf(selectedType);
@@ -208,28 +210,30 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	@Override
 	public ParameterValue getDefaultParameterValue() {
-		String defaultValue = "";
+		String localDefaultValue = "";
 
 		try {
-			defaultValue = getEffectiveDefaultValue();
+			localDefaultValue = getEffectiveDefaultValue();
 		} catch (Exception e) {
 			LOGGER.warning(
-					String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), defaultValue));
+					String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), localDefaultValue));
 		}
-		if (!StringUtils.isBlank(defaultValue)) {
+		if (!StringUtils.isBlank(localDefaultValue)) {
             return new FileSystemListParameterValue(
                 getName(), 
-                this.includePathInValue ? new File(this.path, defaultValue).getPath() : defaultValue
+                this.includePathInValue ? new File(this.path, localDefaultValue).getPath() : localDefaultValue
             );
 		}
 		return super.getDefaultParameterValue();
 	}
 
 	private String getEffectiveDefaultValue() throws Exception {
-
 		List<String> defaultList = getFsObjectsList();
-		String defaultValue = defaultList.get(0);
-		return defaultValue;
+		if (defaultList.contains(getDefaultValue())) {
+			return getDefaultValue();
+		} else {
+			return defaultList.get(0);
+		}
 	}
 
 	public List<String> getFsObjectsList() throws Exception {
@@ -515,10 +519,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return value;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
-	}
-
 	public String getRegexIncludePattern() {
 		return regexIncludePattern;
 	}
@@ -529,6 +529,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	public String getNodeName() {
 		return nodeName;
+	}
+
+	public String getDefaultValue() {
+		return defaultValue;
 	}
 
 }

@@ -26,7 +26,7 @@ public class RegexFilterTest {
         boolean includePathInValue = false;
 		String includePattern = "";
 		String excludePattern = "";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "", "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
 
 		List<String> list = pd.getFsObjectsList();
 		
@@ -42,7 +42,7 @@ public class RegexFilterTest {
         boolean includePathInValue = false;
 		String includePattern = "notFound";
 		String excludePattern = "";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "", "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
 		
 		List<String> list = pd.getFsObjectsList();
 		
@@ -59,7 +59,7 @@ public class RegexFilterTest {
         boolean includePathInValue = false;
 		String includePattern = "[\\w]*3[.]txt";
 		String excludePattern = "";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "", "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
 		
 		List<String> list = pd.getFsObjectsList();
 		
@@ -77,7 +77,7 @@ public class RegexFilterTest {
         boolean includePathInValue = false;
 		String includePattern = "";
 		String excludePattern = "[\\w]*3[.]txt";
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, "", "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
 		
 		List<String> list = pd.getFsObjectsList();
 		

@@ -1,13 +1,26 @@
 package alex.jenkins.plugins;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 import java.util.TreeMap;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import alex.jenkins.plugins.FileSystemListParameterValue;
+
 public class ChangeSequenceTest {
+
+	String path;
+
+	@Before
+	public void setup(){
+		URL resource = getClass().getResource("/1");
+		Assert.assertNotNull("Test test directory missing", resource);
+		path = resource.getPath();
+	}
 	
 	@Test
 	public void testSorting() {
@@ -36,7 +49,7 @@ public class ChangeSequenceTest {
 		boolean sortByLastModified = true;
 		boolean sortReverseOrder = true;
         boolean includePathInValue = false;
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder, includePathInValue);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder, includePathInValue);
 
 		TreeMap<String, Long> map = new TreeMap<>();
 		String test1 = "test1";
@@ -60,7 +73,7 @@ public class ChangeSequenceTest {
 		boolean sortByLastModified = false;
 		boolean sortReverseOrder = false;
         boolean includePathInValue = false;
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder, includePathInValue);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "", "FILE","SINGLE_SELECT", "", "", sortByLastModified, sortReverseOrder, includePathInValue);
 
 		TreeMap<String, Long> map = new TreeMap<>();
 		String test1 = "test1";
@@ -83,5 +96,37 @@ public class ChangeSequenceTest {
 		
 	}
 
+	@Test
+	public void testGetExistingDefaultValue() throws Exception {
+		
+		boolean sortByLastModified = false;
+		boolean sortReverseOrder = false;
+	    boolean includePathInValue = false;
+		String includePattern = "";
+		String excludePattern = "";
+		String definition_default = "test2.txt";
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, definition_default, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
+		
+		String result_default = (String) pd.getDefaultParameterValue().getValue();
+		Assert.assertEquals(definition_default, result_default);
+					
+	}
+	
+	@Test
+	public void testGetNonExistingDefaultValue() throws Exception {
+		
+		boolean sortByLastModified = false;
+		boolean sortReverseOrder = false;
+		boolean includePathInValue = false;
+		String includePattern = "";
+		String excludePattern = "";
+		String definition_default = "test4.txt";
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", path, definition_default, "FILE","SINGLE_SELECT", includePattern, excludePattern, sortByLastModified, sortReverseOrder, includePathInValue);
+		
+		String result_default = (String) pd.getDefaultParameterValue().getValue();
+		Assert.assertNotEquals(definition_default, result_default);
+		
+	}
+	
 	
 }

@@ -10,6 +10,14 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.9 (December 30, 2023)
+
+-   Added **includePathInValue** option by [allancth](https://github.com/jenkinsci/filesystem-list-parameter-plugin/commits?author=allancth).
+-   Added **default value**. Pre-select element if it is in the objects list.
+-   Security issue:
+    [JENKINS-69980 Plugin Homepage still shows security vulnerability warning for version 0.0.8](https://issues.jenkins.io/browse/JENKINS-69980)
+-   Update versions, formatting a.s.o.
+
 ##### Version 0.0.8 (July 06, 2022)
 
 -   Security issue:
@@ -58,6 +66,7 @@ The order of the list can be reversed.
 
 -   **Name** and **Description** should be clear
 -   **Path** to the directory to select filesystem objects
+-   **Default value** to pre-select an element from objects list
 -   **Filesystem object type** - filter for type of the file system
     objects that can be selected.
 -   **Sort by last modified date** - If true, the list of the parameter
