@@ -10,6 +10,10 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.10 (February 29, 2024)
+
+-   Fix IllegalStateException: Refusing to load the Jenkins test harness in production [JENKINS-72789](https://issues.jenkins.io/browse/JENKINS-72789)
+
 ##### Version 0.0.9 (December 30, 2023)
 
 -   Added **includePathInValue** option by [allancth](https://github.com/jenkinsci/filesystem-list-parameter-plugin/commits?author=allancth).
