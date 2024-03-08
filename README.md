@@ -7,6 +7,60 @@ This plugin provides a build parameter with a value from objects names in filesy
 
 For more information see the [homepage].
 
+# Examples for version 0.0.10
+
+## Pipeline parameter
+
+```
+pipeline{
+  agent {
+    label 'built-in'
+  }
+  parameters {
+    fileSystemList \
+      name: 'FSPARAM', \
+      description: 'param description', \
+      nodeName: 'built-in', \
+      path: '/tmp', \
+      defaultValue: '', \
+      selectedType: 'DIRECTORY', \
+      regexIncludePattern: '', \
+      regexExcludePattern: '', \
+      sortByLastModified: true, \
+      sortReverseOrder: true, \
+      includePathInValue: false
+  }
+  stages{
+    stage('Test Stage') {
+      steps {
+        echo "${env.FSPARAM}"
+      }
+    }
+  }
+}
+```
+
+## DSL
+```
+job("restore"){
+  parameters {
+    fileSystemListParameterDefinition {
+      name('BACKUP_SOURCE')
+      description('Choose latest backup source for restore.')
+      nodeName('built-in')
+      formSelectType('SINGLE_SELECT')
+      path('/var/lib/jenkins/userContent/backups')
+      includePathInValue(false)
+      defaultValue('backup-latest')
+      selectedType('DIRECTORY')
+      regexIncludePattern('backup-.*')
+      regexExcludePattern('')
+      sortByLastModified(true)
+      sortReverseOrder(true)
+    }
+  }
+}
+```
 
 # Change Log
 
@@ -18,8 +72,6 @@ For more information see the [homepage].
 
 -   Added **includePathInValue** option by [allancth](https://github.com/jenkinsci/filesystem-list-parameter-plugin/commits?author=allancth).
 -   Added **default value**. Pre-select element if it is in the objects list.
--   Security issue:
-    [JENKINS-69980 Plugin Homepage still shows security vulnerability warning for version 0.0.8](https://issues.jenkins.io/browse/JENKINS-69980)
 -   Update versions, formatting a.s.o.
 
 ##### Version 0.0.8 (July 06, 2022)
