@@ -25,7 +25,7 @@ For more information see the [homepage].
 ##### Version 0.0.8 (July 06, 2022)
 
 -   Security issue:
-    [SECURITY-2716 - Stored XSS vulnerability](https://issues.jenkins.io/browse/SECURITY-2716)
+    [SECURITY-2716 - Stored XSS vulnerability](https://www.jenkins.io/security/advisory/2022-06-22/#SECURITY-2784)
 
 ##### Version 0.0.7 (March 18, 2021)
 
