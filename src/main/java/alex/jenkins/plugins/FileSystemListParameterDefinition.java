@@ -194,11 +194,11 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		Object value = jO.get("value");
 		String strValue = "";
 		if (value instanceof String) {
-            strValue = this.includePathInValue ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value);
+            strValue = this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value);
 		} else if (value instanceof JSONArray) {
 			JSONArray jsonValues = (JSONArray) value;
             strValue = StringUtils.join(
-                    this.includePathInValue ? jsonValues.stream()
+                    this.isIncludePathInValue() ? jsonValues.stream()
                                                         .filter(e -> !StringUtils.isBlank(String.valueOf(e)))
                                                         .map(e -> new File(this.path, String.valueOf(e)).getPath()).iterator()
                                             : jsonValues.iterator(), 
@@ -221,7 +221,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		if (!StringUtils.isBlank(localDefaultValue)) {
             return new FileSystemListParameterValue(
                 getName(), 
-                this.includePathInValue ? new File(this.path, localDefaultValue).getPath() : localDefaultValue
+                this.isIncludePathInValue() ? new File(this.path, localDefaultValue).getPath() : localDefaultValue
             );
 		}
 		return super.getDefaultParameterValue();
@@ -533,6 +533,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	public String getDefaultValue() {
 		return defaultValue;
+	}
+
+	public boolean isIncludePathInValue() {
+		return includePathInValue;
 	}
 
 }
