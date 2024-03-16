@@ -7,62 +7,12 @@ This plugin provides a build parameter with a value from objects names in filesy
 
 For more information see the [homepage].
 
-# Examples for version 0.0.10
-
-## Pipeline parameter
-
-```
-pipeline{
-  agent {
-    label 'built-in'
-  }
-  parameters {
-    fileSystemList \
-      name: 'FSPARAM', \
-      description: 'param description', \
-      nodeName: 'built-in', \
-      path: '/tmp', \
-      defaultValue: '', \
-      selectedType: 'DIRECTORY', \
-      regexIncludePattern: '', \
-      regexExcludePattern: '', \
-      sortByLastModified: true, \
-      sortReverseOrder: true, \
-      includePathInValue: false
-  }
-  stages{
-    stage('Test Stage') {
-      steps {
-        echo "${env.FSPARAM}"
-      }
-    }
-  }
-}
-```
-
-## DSL
-```
-job("restore"){
-  parameters {
-    fileSystemListParameterDefinition {
-      name('BACKUP_SOURCE')
-      description('Choose latest backup source for restore.')
-      nodeName('built-in')
-      formSelectType('SINGLE_SELECT')
-      path('/var/lib/jenkins/userContent/backups')
-      includePathInValue(false)
-      defaultValue('backup-latest')
-      selectedType('DIRECTORY')
-      regexIncludePattern('backup-.*')
-      regexExcludePattern('')
-      sortByLastModified(true)
-      sortReverseOrder(true)
-    }
-  }
-}
-```
 
 # Change Log
+
+##### Version 0.0.11 (March 16, 2024)
+
+-   Generate Declarative Directive now available for plugin [JENKINS-66336](https://issues.jenkins.io/browse/JENKINS-66336)
 
 ##### Version 0.0.10 (February 29, 2024)
 
