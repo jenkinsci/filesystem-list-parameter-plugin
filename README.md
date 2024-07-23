@@ -10,6 +10,10 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.12 (July 23, 2024)
+
+-   Small bugfix - After adding the parameter to a job, other parameters/steps can't be added [JENKINS-73159](https://issues.jenkins.io/browse/JENKINS-73159)
+
 ##### Version 0.0.11 (March 16, 2024)
 
 -   Generate Declarative Directive now available for plugin [JENKINS-66336](https://issues.jenkins.io/browse/JENKINS-66336)
