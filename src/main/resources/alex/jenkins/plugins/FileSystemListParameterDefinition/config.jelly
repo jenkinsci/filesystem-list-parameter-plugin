@@ -10,12 +10,12 @@
 		<f:textarea name="parameter.description" value="${instance.description}" codemirror-mode="${app.markupFormatter.codeMirrorMode}" codemirror-config="${app.markupFormatter.codeMirrorConfig}" previewEndpoint="/markupFormatter/previewDescription" />
 	</f:entry>
 	
-	<f:entry title="NodeName" field="nodeName">
-      <select name="nodeName" >
+	<f:entry title="NodeName" field="selected-nodeName">
+      <select name="selected-nodeName" >
         <j:invokeStatic className="alex.jenkins.plugins.FileSystemListParameterDefinition" method="getNodeNames" var="nodeList" />
         <j:forEach var="node" items="${nodeList}" varStatus="loop">
             <j:choose>
-                <j:when test="${instance.nodeName.equals(node)}">
+                <j:when test="${instance.selected-nodeName.equals(node)}">
                     <option value="${node}" selected="selected">${node}</option>
                 </j:when>
                 <j:otherwise>
