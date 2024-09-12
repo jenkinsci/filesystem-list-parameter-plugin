@@ -17,7 +17,7 @@
     </description>
 
   <properties>
-    <jenkins.version>2.420</jenkins.version>
+    <jenkins.version>2.430</jenkins.version>
   </properties>
 
   <licenses>

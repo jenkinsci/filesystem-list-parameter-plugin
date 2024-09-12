@@ -10,6 +10,10 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.13 (September 12, 2024)
+
+-   Small bugfix - Node Name parameter not stored in Freestyle jobs [JENKINS-73698](https://issues.jenkins.io/browse/JENKINS-73698)
+
 ##### Version 0.0.12 (July 23, 2024)
 
 -   Small bugfix - After adding the parameter to a job, other parameters/steps can't be added [JENKINS-73159](https://issues.jenkins.io/browse/JENKINS-73159)

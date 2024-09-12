@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -70,7 +71,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			return FormValidation.ok();
 		}
 
-		public FormValidation doCheckPath(@QueryParameter final String path, @QueryParameter final String nodeName) throws IOException, InterruptedException {
+		public FormValidation doCheckPath(@QueryParameter final String path, @QueryParameter final String selectedNodeName) throws IOException, InterruptedException {
 			if (StringUtils.isBlank(path)) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathCanNotBeEmpty());
 			}
@@ -80,7 +81,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			VirtualChannel channel = null;
 
 
-			if (nodeName==null || nodeName.equals(MASTER)) {
+			if (selectedNodeName==null || selectedNodeName.equals(MASTER)) {
 				File dir = new File(path);
 				if (!dir.exists()) {
 					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
@@ -95,8 +96,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			} else {
 
 
-				if (!nodeName.trim().isEmpty() && instance != null) {
-					computer = instance.getComputer(nodeName);
+				if (!selectedNodeName.trim().isEmpty() && instance != null) {
+					computer = instance.getComputer(selectedNodeName);
 					if (computer != null) {
 						channel = computer.getChannel();
 					}
@@ -141,7 +142,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 
-	private String nodeName;
+	private String selectedNodeName;
 	private String path;
 	private String selectedType;
 	private String formSelectType;
@@ -159,7 +160,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	 * @param description
 	 */
 	@DataBoundConstructor
-	public FileSystemListParameterDefinition(String name, String description, String nodeName, String path, String defaultValue, String selectedType,
+	public FileSystemListParameterDefinition(String name, String description, String selectedNodeName, String path, String defaultValue, String selectedType,
 			String formSelectType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
 			boolean sortReverseOrder, boolean includePathInValue) {
 
@@ -167,7 +168,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
         super.setDescription(description);
 
-		this.nodeName = nodeName;
+		this.selectedNodeName = selectedNodeName;
 		this.path = Util.fixNull(path);
 		this.defaultValue = defaultValue;
 		this.selectedType = selectedType;
@@ -241,8 +242,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		Computer computer = null;
 		VirtualChannel channel = null;
 		Jenkins instance = Jenkins.getInstanceOrNull();
-		if (getNodeName() != null && !getNodeName().trim().isEmpty() && instance != null) {
-			computer = instance.getComputer(getNodeName());
+		if (getSelectedNodeName() != null && !getSelectedNodeName().trim().isEmpty() && instance != null) {
+			computer = instance.getComputer(getSelectedNodeName());
 			if (computer != null) {
 				channel = computer.getChannel();
 			}
@@ -480,10 +481,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			// add master
 			list.add(MASTER);
 			for (Node node : nodes) {
-				String nodeName = node.getNodeName();
-				if (StringUtils.isNotBlank(nodeName)) {
-					LOGGER.finest("# add " + nodeName);
-					list.add(nodeName);
+				String tmpNodeName = node.getNodeName();
+				if (StringUtils.isNotBlank(tmpNodeName)) {
+					LOGGER.finest("# add " + tmpNodeName);
+					list.add(tmpNodeName);
 				}
 			}
 
@@ -527,10 +528,15 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return regexExcludePattern;
 	}
 
-	public String getNodeName() {
-		return nodeName;
+	public String getSelectedNodeName() {
+		return selectedNodeName;
 	}
 
+	@DataBoundSetter
+	public String setSelectedNodeName() {
+		return selectedNodeName;
+	}
+	
 	public String getDefaultValue() {
 		return defaultValue;
 	}
