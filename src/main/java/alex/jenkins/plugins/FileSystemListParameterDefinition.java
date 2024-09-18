@@ -5,6 +5,7 @@ package alex.jenkins.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,7 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -36,6 +36,7 @@ import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
 
 /**
  * @author aendter
@@ -75,11 +76,23 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			if (StringUtils.isBlank(path)) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathCanNotBeEmpty());
 			}
+			
+            // Check Path is symlink
+            if (hudson.Util.isSymlink(new File(path))) {
+                return FormValidation.error(Messages.FileSystemListParameterDefinition_SymlinkPathNotAllowed(), path);
+            }
+            
+            Jenkins instance = Jenkins.getInstanceOrNull();
 
-			Jenkins instance = Jenkins.get();
-			Computer computer = null;
-			VirtualChannel channel = null;
+            // Check Path allowed
+            if (instance != null && !isAllowedPath(path, instance.getRootDir(), null)){
+                return FormValidation.error(Messages.FileSystemListParameterDefinition_PathNotAllowed(), path);
+            }
 
+
+            // Check nodes
+            Computer computer = null;
+            VirtualChannel channel = null;
 
 			if (selectedNodeName==null || selectedNodeName.equals(MASTER)) {
 				File dir = new File(path);
@@ -102,8 +115,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 						channel = computer.getChannel();
 					}
 				}
-
-
+				
+				
 				FilePath filepath = new FilePath(channel, path);
 				if (!filepath.exists()) {
 					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
@@ -141,6 +154,43 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	}
 
+	// TODO: Enable before next 0.1 release
+	// TODO: Disable administrativeMonitor if feature is enabled!
+	static final boolean enableCheckAllowedPath = false;
+	
+    //check allowedPath
+    static boolean isAllowedPath(final String path, final File jenkinsRootDir, FileSystemListParameterGlobalConfiguration testGC) {
+        if(!enableCheckAllowedPath) {
+            LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_CheckAllowedPathDisabled(), path));
+            return true;
+        }
+        FileSystemListParameterGlobalConfiguration globalConfig;
+        // inject testing gc
+        if(testGC==null) {
+            globalConfig = FileSystemListParameterGlobalConfiguration.get();
+        } else {
+            globalConfig = testGC;
+        }
+        List<AdditionalBaseDirPath> additionalBaseDirs = globalConfig.getAdditionalBaseDirs();
+        Path pathToCheck;
+        try {
+            pathToCheck = new File(path).toPath().toRealPath();
+            // userContent
+            if (globalConfig.isEnabledUserContent()) {
+                String userContentPath = jenkinsRootDir.getCanonicalPath() + File.separator + "userContent" + File.separator;
+                if (pathToCheck.startsWith(userContentPath)) {return true;}
+            }
+            // AllowedPathList
+            for (AdditionalBaseDirPath baseDir : additionalBaseDirs) {
+                String baseDirCanonical = new File(baseDir.getAdditionalBaseDirPath()).getCanonicalPath() + File.separator;
+                if (pathToCheck.startsWith(baseDirCanonical)) {return true;}
+            }
+        } catch (IOException e) {
+            LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_PathCheckError(), path));
+        }
+        return false;
+    }
+
 
 	private String selectedNodeName;
 	private String path;
@@ -166,10 +216,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
         super(name);
 
-        super.setDescription(description);
-
 		this.selectedNodeName = selectedNodeName;
-		this.path = Util.fixNull(path);
+	    this.path = Util.fixNull(path);
 		this.defaultValue = defaultValue;
 		this.selectedType = selectedType;
 		this.formSelectType = formSelectType;
@@ -242,6 +290,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		Computer computer = null;
 		VirtualChannel channel = null;
 		Jenkins instance = Jenkins.getInstanceOrNull();
+		
 		if (getSelectedNodeName() != null && !getSelectedNodeName().trim().isEmpty() && instance != null) {
 			computer = instance.getComputer(getSelectedNodeName());
 			if (computer != null) {
@@ -296,8 +345,14 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	List<String> sortList(Map<String, Long> map) {
 		List<String> list;
-
-		if (map.isEmpty()) {
+		Jenkins instance = Jenkins.getInstanceOrNull();
+        if (instance != null && !isAllowedPath(this.path, instance.getRootDir(), null)){
+		    list = new ArrayList<String>();
+		    String msg = String.format(Messages.FileSystemListParameterDefinition_PathNotAllowed(),
+		             getPath()).toString();
+		    LOGGER.warning(msg);
+		    list.add(msg);
+	    } else if (map.isEmpty()) {
 			list = new ArrayList<String>();
 			String msg = String.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(),
 					getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(), getPath()).toString();
@@ -343,20 +398,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return list;
 	}
 
-	static private boolean isSymlink(File file) throws IOException {
-		if (file == null) {
-			throw new NullPointerException("File must not be null");
-		}
-		File canon;
-		if (file.getParent() == null) {
-			canon = file;
-		} else {
-			File canonDir = file.getParentFile().getCanonicalFile();
-			canon = new File(canonDir, file.getName());
-		}
-		return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
-	}
-
 	private boolean isPatternMatching(String name) {
 
 		if (getRegexIncludePattern().equals("") && getRegexExcludePattern().equals("")) {
@@ -376,7 +417,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private void createSymlinkMap(File[] listFiles, Map<String, Long> target) throws IOException {
 
 		for (File file : listFiles) {
-			if (!file.isHidden() && isSymlink(file) && isPatternMatching(file.getName())) {
+			if (!file.isHidden() && hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
 				target.put(file.getName(), file.lastModified());
 				LOGGER.finest("add " + file);
 			}
@@ -386,7 +427,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private void createDirectoryMap(File[] listFiles, Map<String, Long> target) throws IOException {
 
 		for (File file : listFiles) {
-			if (!file.isHidden() && file.isDirectory() && !isSymlink(file) && isPatternMatching(file.getName())) {
+			if (!file.isHidden() && file.isDirectory() && !hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
 				target.put(file.getName(), file.lastModified());
 				LOGGER.finest("add " + file);
 			}
@@ -396,7 +437,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private void createFileMap(File[] listFiles, Map<String, Long> target) throws IOException {
 
 		for (File file : listFiles) {
-			if (!file.isHidden() && file.isFile() && !isSymlink(file) && isPatternMatching(file.getName())) {
+			if (!file.isHidden() && file.isFile() && !hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
 				target.put(file.getName(), file.lastModified());
 				LOGGER.finest("add " + file);
 			}
@@ -538,6 +579,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	
 	public String getDefaultValue() {
 		return defaultValue;
+	}
+
+	public void setDescription(String description) {
+	    super.setDescription(description);
 	}
 
 	public boolean isIncludePathInValue() {

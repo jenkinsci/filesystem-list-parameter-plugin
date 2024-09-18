@@ -1,0 +1,23 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+ xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+  <f:section title="File System List Parameter">
+    <f:entry title="Allowed base directories">
+
+      <f:entry title="Enable default base directory JENKINS_HOME/userContent on built-in and nodes." field="enabledUserContent">
+        <f:checkbox checked="${instance.enabledUserContent}" default="true" />
+      </f:entry>
+      <f:repeatable field="additionalBaseDirs" minimum="0" add="add basedir">
+        <table width="100%">
+          <f:entry title="Additional allowed base directory path" field="additionalBaseDirPath" >
+            <f:textbox />
+          </f:entry>
+          <f:entry title="">
+            <div align="right"><f:repeatableDeleteButton/></div>
+          </f:entry>
+        </table>
+      </f:repeatable>
+    </f:entry>
+  </f:section>
+</j:jelly>

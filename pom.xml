@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.53</version>
+    <version>4.87</version>
   </parent>
 
   <groupId>aendter.jenkins.plugins</groupId>
@@ -17,7 +17,7 @@
     </description>
 
   <properties>
-    <jenkins.version>2.430</jenkins.version>
+    <jenkins.version>2.440.3</jenkins.version>
   </properties>
 
   <licenses>

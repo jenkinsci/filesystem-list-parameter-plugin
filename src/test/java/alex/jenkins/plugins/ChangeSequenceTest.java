@@ -9,13 +9,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import alex.jenkins.plugins.FileSystemListParameterValue;
 
 public class ChangeSequenceTest {
 
 	String path;
 
-	@Before
+    @Before
 	public void setup(){
 		URL resource = getClass().getResource("/1");
 		Assert.assertNotNull("Test test directory missing", resource);
@@ -113,7 +112,7 @@ public class ChangeSequenceTest {
 	}
 	
 	@Test
-	public void testGetNonExistingDefaultValue() throws Exception {
+	public void testGetNonExistingDefaultValue() {
 		
 		boolean sortByLastModified = false;
 		boolean sortReverseOrder = false;
