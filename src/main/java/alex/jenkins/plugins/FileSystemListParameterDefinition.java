@@ -532,7 +532,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return selectedNodeName;
 	}
 
-	@DataBoundSetter
 	public String setSelectedNodeName() {
 		return selectedNodeName;
 	}
