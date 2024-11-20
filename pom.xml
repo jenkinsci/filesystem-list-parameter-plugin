@@ -1,9 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.53</version>
+    <version>5.3</version>
+    <relativePath />
   </parent>
 
   <groupId>aendter.jenkins.plugins</groupId>
@@ -12,12 +15,11 @@
   <packaging>hpi</packaging>
 
   <name>Jenkins Filesystem List Parameter Plug-in</name>
-  <description>
-  This plugin reads folder, file or symbolic link names from filesystem path as parameter value.
-    </description>
 
   <properties>
-    <jenkins.version>2.430</jenkins.version>
+    <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
+    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
   </properties>
 
   <licenses>
@@ -28,13 +30,13 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:jenkinsci/filesystem-list-parameter-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/filesystem-list-parameter-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/filesystem-list-parameter-plugin</url>
-    <tag>filesystem-list-parameter-plugin-0.0.11</tag>
+    <connection>scm:git:https://github.com/${gitHubRepo}</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
-  <url>https://wiki.jenkins.io/display/JENKINS/Filesystem+List+Parameter+Plug-in</url>
+  <url>https://github.com/${gitHubRepo}</url>
 
   <developers>
     <developer>
@@ -61,12 +63,21 @@
     </pluginRepository>
   </pluginRepositories>
 
-
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
+        <version>3696.vb_b_4e2d1a_0542</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
       <artifactId>rebuild</artifactId>
-      <version>330.v645b_7df10e2a_</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
