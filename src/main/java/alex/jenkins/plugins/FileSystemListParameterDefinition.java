@@ -21,7 +21,7 @@ import org.jenkinsci.Symbol;
 import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -250,7 +250,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		
 		
 	@Override
-	public ParameterValue createValue(StaplerRequest request) {
+	public ParameterValue createValue(StaplerRequest2 request) {
 		String parameterValues[] = request.getParameterValues(getName());
 		if (parameterValues == null || parameterValues.length == 0) {
 			return getDefaultParameterValue();
@@ -262,7 +262,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 	@Override
-	public ParameterValue createValue(StaplerRequest request, JSONObject jO) {
+	public ParameterValue createValue(StaplerRequest2 request, JSONObject jO) {
 		Object value = jO.get("value");
 		String strValue = "";
 		if (value instanceof String) {
