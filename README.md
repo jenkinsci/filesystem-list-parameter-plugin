@@ -10,20 +10,12 @@ For more information see the [homepage].
 
 # Change Log
 
-##### Version 0.1.0 (soon)
-
--   Enable allowed base dirs feature - not allowed paths will not return objects from filesystem.
-  - The allowed base dirs check **is enabled**
-
-##### Version 0.0.15 (November 11, 2024)
+##### Version 0.0.15 (November 23, 2024)
 
 - Add allowed base dirs feature: 
   - Create a list of base dirs configured in manage/configure page.
   - The path within the plugin's job config will be checked against the allowed base dirs list.
   - Default is userContent directory for built-in or nodes
-- The feature will be enabled.
-  - Allowed base dirs can be configured.
-  - The allowed base dirs check **is disabled** until next minor version is released.
   - An administrative monitor is activated as reminder to configure allowed base dirs.
 
 ##### Version 0.0.14 (September 19, 2024)

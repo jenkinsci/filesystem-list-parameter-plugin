@@ -67,20 +67,16 @@ public class NotAllowedBaseDirTest {
 
     @Test
     public void testAdditionalBaseDir() {
-        if (FileSystemListParameterDefinition.enableCheckAllowedPath) {
-            assertTrue(FileSystemListParameterDefinition.isAllowedPath(allowedPath, jenkinsTmpRoot, gc));
-            assertFalse(FileSystemListParameterDefinition.isAllowedPath(allowedSimilarFile, jenkinsTmpRoot, gc));
-            assertFalse(FileSystemListParameterDefinition.isAllowedPath(notAllowedFile, jenkinsTmpRoot, gc));
-            assertFalse(FileSystemListParameterDefinition.isAllowedPath(notAllowedSimilarFile, jenkinsTmpRoot, gc));
-        }
+        assertTrue(FileSystemListParameterDefinition.isAllowedPath(allowedPath, jenkinsTmpRoot, gc));
+        assertFalse(FileSystemListParameterDefinition.isAllowedPath(allowedSimilarFile, jenkinsTmpRoot, gc));
+        assertFalse(FileSystemListParameterDefinition.isAllowedPath(notAllowedFile, jenkinsTmpRoot, gc));
+        assertFalse(FileSystemListParameterDefinition.isAllowedPath(notAllowedSimilarFile, jenkinsTmpRoot, gc));
     }
 
     @Test
     public void testUserContent() {
-        if (FileSystemListParameterDefinition.enableCheckAllowedPath) {
-            assertTrue(FileSystemListParameterDefinition.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
-            gc.setEnabledUserContent(false);
-            assertFalse(FileSystemListParameterDefinition.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
-        }
+        assertTrue(FileSystemListParameterDefinition.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
+        gc.setEnabledUserContent(false);
+        assertFalse(FileSystemListParameterDefinition.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
     }
 }

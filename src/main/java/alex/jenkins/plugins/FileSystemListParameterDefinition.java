@@ -154,16 +154,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	}
 
-	// TODO: Enable before next 0.1 release
-	// TODO: Disable administrativeMonitor if feature is enabled!
-	static final boolean enableCheckAllowedPath = false;
-	
+		// TODO: Remove administrativeMonitor with next release!
     //check allowedPath
     static boolean isAllowedPath(final String path, final File jenkinsRootDir, FileSystemListParameterGlobalConfiguration testGC) {
-        if(!enableCheckAllowedPath) {
-            LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_CheckAllowedPathDisabled(), path));
-            return true;
-        }
         FileSystemListParameterGlobalConfiguration globalConfig;
         // inject testing gc
         if(testGC==null) {
