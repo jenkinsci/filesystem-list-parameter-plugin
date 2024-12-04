@@ -13,6 +13,7 @@ For more information see the [homepage].
 ##### Version 0.0.16 (December 05, 2024)
 
 - Bugfix supporting jenkins cli and buildWithParameters POSTs [JENKINS-60978](https://issues.jenkins.io/browse/JENKINS-60978)
+  - buildWithParameters: Note that the & will need to be escaped, or the whole URL quoted, if using a Unix shell script.
 - Activate renovating depandabot
 
 ##### Version 0.0.15 (November 23, 2024)
