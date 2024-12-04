@@ -10,6 +10,11 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.16 (December 05, 2024)
+
+- Bugfix supporting jenkins cli and buildWithParameters POSTs [JENKINS-60978](https://issues.jenkins.io/browse/JENKINS-60978)
+- Activate renovating depandabot
+
 ##### Version 0.0.15 (November 23, 2024)
 
 - Add allowed base dirs feature: 

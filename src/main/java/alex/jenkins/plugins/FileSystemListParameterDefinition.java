@@ -27,10 +27,12 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.FilePath.FileCallable;
 import hudson.Util;
+import hudson.cli.CLICommand;
 import hudson.model.Computer;
 import hudson.model.Node;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
+import hudson.model.StringParameterValue;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
@@ -77,22 +79,22 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathCanNotBeEmpty());
 			}
 			
-            // Check Path is symlink
-            if (hudson.Util.isSymlink(new File(path))) {
-                return FormValidation.error(Messages.FileSystemListParameterDefinition_SymlinkPathNotAllowed(), path);
-            }
-            
-            Jenkins instance = Jenkins.getInstanceOrNull();
+			// Check Path is symlink
+			if (hudson.Util.isSymlink(new File(path))) {
+				return FormValidation.error(Messages.FileSystemListParameterDefinition_SymlinkPathNotAllowed(), path);
+			}
+			
+			Jenkins instance = Jenkins.getInstanceOrNull();
 
-            // Check Path allowed
-            if (instance != null && !isAllowedPath(path, instance.getRootDir(), null)){
-                return FormValidation.error(Messages.FileSystemListParameterDefinition_PathNotAllowed(), path);
-            }
+			// Check Path allowed
+			if (instance != null && !isAllowedPath(path, instance.getRootDir(), null)){
+				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathNotAllowed(), path);
+			}
 
 
-            // Check nodes
-            Computer computer = null;
-            VirtualChannel channel = null;
+			// Check nodes
+			Computer computer = null;
+			VirtualChannel channel = null;
 
 			if (selectedNodeName==null || selectedNodeName.equals(MASTER)) {
 				File dir = new File(path);
@@ -154,35 +156,35 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	}
 
-		// TODO: Remove administrativeMonitor with next release!
-    //check allowedPath
-    static boolean isAllowedPath(final String path, final File jenkinsRootDir, FileSystemListParameterGlobalConfiguration testGC) {
-        FileSystemListParameterGlobalConfiguration globalConfig;
-        // inject testing gc
-        if(testGC==null) {
-            globalConfig = FileSystemListParameterGlobalConfiguration.get();
-        } else {
-            globalConfig = testGC;
-        }
-        List<AdditionalBaseDirPath> additionalBaseDirs = globalConfig.getAdditionalBaseDirs();
-        Path pathToCheck;
-        try {
-            pathToCheck = new File(path).toPath().toRealPath();
-            // userContent
-            if (globalConfig.isEnabledUserContent()) {
-                String userContentPath = jenkinsRootDir.getCanonicalPath() + File.separator + "userContent" + File.separator;
-                if (pathToCheck.startsWith(userContentPath)) {return true;}
-            }
-            // AllowedPathList
-            for (AdditionalBaseDirPath baseDir : additionalBaseDirs) {
-                String baseDirCanonical = new File(baseDir.getAdditionalBaseDirPath()).getCanonicalPath() + File.separator;
-                if (pathToCheck.startsWith(baseDirCanonical)) {return true;}
-            }
-        } catch (IOException e) {
-            LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_PathCheckError(), path));
-        }
-        return false;
-    }
+	// TODO: Remove administrativeMonitor with next release!
+	//check allowedPath
+	static boolean isAllowedPath(final String path, final File jenkinsRootDir, FileSystemListParameterGlobalConfiguration testGC) {
+			FileSystemListParameterGlobalConfiguration globalConfig;
+			// inject testing gc
+			if(testGC==null) {
+					globalConfig = FileSystemListParameterGlobalConfiguration.get();
+			} else {
+					globalConfig = testGC;
+			}
+			List<AdditionalBaseDirPath> additionalBaseDirs = globalConfig.getAdditionalBaseDirs();
+			Path pathToCheck;
+			try {
+					pathToCheck = new File(path).toPath().toRealPath();
+					// userContent
+					if (globalConfig.isEnabledUserContent()) {
+							String userContentPath = jenkinsRootDir.getCanonicalPath() + File.separator + "userContent" + File.separator;
+							if (pathToCheck.startsWith(userContentPath)) {return true;}
+					}
+					// AllowedPathList
+					for (AdditionalBaseDirPath baseDir : additionalBaseDirs) {
+							String baseDirCanonical = new File(baseDir.getAdditionalBaseDirPath()).getCanonicalPath() + File.separator;
+							if (pathToCheck.startsWith(baseDirCanonical)) {return true;}
+					}
+			} catch (IOException e) {
+					LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_PathCheckError(), path));
+			}
+			return false;
+	}
 
 
 	private String selectedNodeName;
@@ -196,7 +198,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private String regexExcludePattern;
 	private String value;
 	private String defaultValue;
-    private boolean includePathInValue;
+  private boolean includePathInValue;
 
 	/**
 	 * @param name
@@ -207,10 +209,10 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			String formSelectType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
 			boolean sortReverseOrder, boolean includePathInValue) {
 
-        super(name);
+    super(name);
 
 		this.selectedNodeName = selectedNodeName;
-	    this.path = Util.fixNull(path);
+	  this.path = Util.fixNull(path);
 		this.defaultValue = defaultValue;
 		this.selectedType = selectedType;
 		this.formSelectType = formSelectType;
@@ -219,16 +221,44 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		this.sortReverseOrder = sortReverseOrder;
 		this.regexIncludePattern = regexIncludePattern;
 		this.regexExcludePattern = regexExcludePattern;
-        this.includePathInValue = includePathInValue;
+    this.includePathInValue = includePathInValue;
 	}
 
+
+	// https://issues.jenkins.io/browse/JENKINS-74886
+	@Override
+	public ParameterValue createValue(CLICommand command, String value) throws IOException, InterruptedException {
+		StringParameterValue parameterValue = new StringParameterValue(this.getName(), this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value));
+		return checkParameterValue(parameterValue);
+	}
+	
+	private ParameterValue checkParameterValue(StringParameterValue parameterValue) {
+		try {
+			List<String> valuesPossible = getFsObjectsList();
+			if (valuesPossible.contains(parameterValue.getValue())) {
+				return parameterValue;
+			} else {
+				//throw new UnsupportedOperationException("Value not valid!");
+				//return new StringParameterValue(this.getName(), "injected_value_not_valid__please_check_objects_list");
+				LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_InjectedObjectNotFoundAtPath(), parameterValue.getValue(), path));
+				return null;
+			}
+		} catch (Exception e) {
+			throw new UnsupportedOperationException("Problem checking value: " + e.getMessage());
+		}
+	}
+		
+		
 	@Override
 	public ParameterValue createValue(StaplerRequest request) {
-		String value[] = request.getParameterValues(getName());
-		if (value == null) {
+		String parameterValues[] = request.getParameterValues(getName());
+		if (parameterValues == null || parameterValues.length == 0) {
 			return getDefaultParameterValue();
 		}
-		return null;
+		String value = parameterValues[0];
+		StringParameterValue stringParameterValue = new StringParameterValue(this.getName(), this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value));
+
+		return checkParameterValue(stringParameterValue);
 	}
 
 	@Override
