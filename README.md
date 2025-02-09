@@ -10,6 +10,10 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.17 (February 15, 2025)
+- Remove administrative monitor "reminder to configure allowed base dirs".
+
+
 ##### Version 0.0.16 (December 05, 2024)
 
 - Bugfix supporting jenkins cli and buildWithParameters POSTs [JENKINS-60978](https://issues.jenkins.io/browse/JENKINS-60978)

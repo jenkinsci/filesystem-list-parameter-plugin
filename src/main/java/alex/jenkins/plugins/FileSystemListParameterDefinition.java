@@ -156,7 +156,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	}
 
-	// TODO: Remove administrativeMonitor with next release!
 	//check allowedPath
 	static boolean isAllowedPath(final String path, final File jenkinsRootDir, FileSystemListParameterGlobalConfiguration testGC) {
 			FileSystemListParameterGlobalConfiguration globalConfig;
