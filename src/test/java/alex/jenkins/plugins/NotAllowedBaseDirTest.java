@@ -50,8 +50,11 @@ public class NotAllowedBaseDirTest {
         list.add(additionalBaseDirs);
         gc.setAdditionalBaseDirs(list);
         gc.setEnabledUserContent(true);
+		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "", "FILE","SINGLE_SELECT", "", "", false, false, false);
+        pd.getDefaultValue();
+        FileSystemListParameterDefinition.addTestGC(gc);
     }
-
+    
     private String getAbsolutePath(String path) {
         URL resource = getClass().getResource(path);
         Assert.assertNotNull("Test test directory missing", resource);
@@ -64,19 +67,19 @@ public class NotAllowedBaseDirTest {
         assertFalse(allowedPath.startsWith(notAllowedPath));
     }
     
-
+    
     @Test
     public void testAdditionalBaseDir() {
-        assertTrue(FileSystemListParameterDefinition.isAllowedPath(allowedPath, jenkinsTmpRoot, gc));
-        assertFalse(FileSystemListParameterDefinition.isAllowedPath(allowedSimilarFile, jenkinsTmpRoot, gc));
-        assertFalse(FileSystemListParameterDefinition.isAllowedPath(notAllowedFile, jenkinsTmpRoot, gc));
-        assertFalse(FileSystemListParameterDefinition.isAllowedPath(notAllowedSimilarFile, jenkinsTmpRoot, gc));
+        assertTrue(Utils.isAllowedPath(allowedPath, jenkinsTmpRoot, gc));
+        assertFalse(Utils.isAllowedPath(allowedSimilarFile, jenkinsTmpRoot, gc));
+        assertFalse(Utils.isAllowedPath(notAllowedFile, jenkinsTmpRoot, gc));
+        assertFalse(Utils.isAllowedPath(notAllowedSimilarFile, jenkinsTmpRoot, gc));
     }
 
     @Test
     public void testUserContent() {
-        assertTrue(FileSystemListParameterDefinition.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
+        assertTrue(Utils.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
         gc.setEnabledUserContent(false);
-        assertFalse(FileSystemListParameterDefinition.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
+        assertFalse(Utils.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
     }
 }
