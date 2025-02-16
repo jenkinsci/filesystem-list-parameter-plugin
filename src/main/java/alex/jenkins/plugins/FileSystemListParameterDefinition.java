@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -50,7 +49,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private static final long serialVersionUID = 9032072543915872650L;
 	private static final Logger LOGGER = Logger.getLogger(FileSystemListParameterDefinition.class.getName());
 	public static final String MASTER = "master";
-	static transient FileSystemListParameterGlobalConfiguration testGC = null;
+	static FileSystemListParameterGlobalConfiguration testGC = null;
 
 	static void addTestGC(FileSystemListParameterGlobalConfiguration testGC) {
 		FileSystemListParameterDefinition.testGC = testGC;
@@ -281,9 +280,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			return defaultList.get(0);
 		}
 	}
-	
+
 	static class FilesLister extends MasterToSlaveFileCallable<List<String>> {
-		
+
 		private static final long serialVersionUID = 1;
 		private FsObjectTypes selectedEnumType;
 		private String regexIncludePattern;
@@ -291,8 +290,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		private String path;
 		private boolean isSortByLastModified;
 		private boolean isSortReverseOrder;
-		//private File jenkinsRootdir;
-
 
 		FilesLister(FsObjectTypes selectedEnumType, String regexIncludePattern, String regexExcludePattern,
 				String path, boolean isSortByLastModified, boolean isSortReverseOrder) {
@@ -302,14 +299,24 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			this.path = path;
 			this.isSortByLastModified = isSortByLastModified;
 			this.isSortReverseOrder = isSortReverseOrder;
-			//this.jenkinsRootdir = jenkinsRootdir;
 		}
 
 		@Override
 		public List<String> invoke(File rootDir, VirtualChannel channel) {
 			TreeMap<String, Long> map = new TreeMap<>();
-
+			
 			try {
+				// additional check prevent symlink usage
+				Path realPath = rootDir.toPath().toRealPath();
+				Path absolutePath = rootDir.toPath().toAbsolutePath();
+				if(!realPath.equals(absolutePath)) {
+					List<String> notAllowedList = new ArrayList<String>();
+					String msgNotAllowed = String.format(Messages.FileSystemListParameterDefinition_PathNotAllowed()+" Symlinks are not allowed to be used as list objects path.", this.path)
+							.toString();
+					LOGGER.warning(msgNotAllowed);
+					notAllowedList.add(msgNotAllowed);
+					return notAllowedList;
+				}
 				File[] listFiles = rootDir.listFiles();
 
 				if (listFiles != null) {
@@ -430,11 +437,12 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 		// handle not allowed
 		List<String> notAllowedList = new ArrayList<String>();
-		String msgNotAllowed = String.format(Messages.FileSystemListParameterDefinition_PathNotAllowed(), this.path).toString();
+		String msgNotAllowed = String.format(Messages.FileSystemListParameterDefinition_PathNotAllowed(), this.path)
+				.toString();
 		LOGGER.warning(msgNotAllowed);
 		notAllowedList.add(msgNotAllowed);
 		if (instance == null) {
-			notAllowedList.add("instanceNull");
+			notAllowedList.add("Jenkins instance is null! Sorry.");
 			return notAllowedList;
 		}
 		if (!Utils.isAllowedPath(this.path, jenkinsRootdir, testGC)) {

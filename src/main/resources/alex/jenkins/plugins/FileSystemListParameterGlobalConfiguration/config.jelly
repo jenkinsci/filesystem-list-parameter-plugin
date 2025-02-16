@@ -5,7 +5,7 @@
   <f:section title="File System List Parameter">
     <f:entry title="Allowed base directories">
 
-      <f:entry title="Enable default base directory JENKINS_HOME/userContent on built-in and nodes." field="enabledUserContent">
+      <f:entry title="Enable default base directory JENKINS_HOME/userContent on built-in (master)." field="enabledUserContent">
         <f:checkbox checked="${instance.enabledUserContent}" default="true" />
       </f:entry>
       <f:repeatable field="additionalBaseDirs" minimum="0" add="add basedir">

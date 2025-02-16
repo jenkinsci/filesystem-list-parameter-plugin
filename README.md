@@ -10,8 +10,11 @@ For more information see the [homepage].
 
 # Change Log
 
-##### Version 0.0.17 (February 15, 2025)
+##### Version 0.0.17 (February 18, 2025)
 - Remove administrative monitor "reminder to configure allowed base dirs".
+- Fix allowed base dirs feature:
+  - Remove userContent directory check for nodes
+- Dependency updates
 
 
 ##### Version 0.0.16 (December 05, 2024)

@@ -25,7 +25,8 @@ public class Utils {
 		List<AdditionalBaseDirPath> additionalBaseDirs = globalConfig.getAdditionalBaseDirs();
 		Path pathToCheck;
 		try {
-			pathToCheck = new File(path).toPath().toRealPath();
+			// note: check absolute equals realpath is done in callable
+			pathToCheck = new File(path).toPath().toAbsolutePath();
 			// userContent
 			if (globalConfig.isEnabledUserContent() && jenkinsRootDir != null) {
 				String userContentPath = jenkinsRootDir.getCanonicalPath() + File.separator + "userContent" + File.separator;
@@ -33,6 +34,7 @@ public class Utils {
 					return true;
 				}
 			}
+
 			// AllowedPathList
 			for (AdditionalBaseDirPath baseDir : additionalBaseDirs) {
 				String baseDirCanonical = new File(baseDir.getAdditionalBaseDirPath()).getCanonicalPath() + File.separator;
