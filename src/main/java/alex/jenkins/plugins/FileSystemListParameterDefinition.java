@@ -36,9 +36,9 @@ import hudson.model.StringParameterValue;
 import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
+import jenkins.MasterToSlaveFileCallable;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
 
 /**
  * @author aendter
@@ -47,20 +47,24 @@ import net.sf.json.JSONObject;
 public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	private static final long serialVersionUID = 9032072543915872650L;
-
 	private static final Logger LOGGER = Logger.getLogger(FileSystemListParameterDefinition.class.getName());
+	public static final String MASTER = "master";
+	static FileSystemListParameterGlobalConfiguration testGC = null;
 
-    public static final String MASTER = "master";
+	static void addTestGC(FileSystemListParameterGlobalConfiguration testGC) {
+		FileSystemListParameterDefinition.testGC = testGC;
+	}
 
-	public static enum FsObjectTypes implements java.io.Serializable {
+	public static enum FsObjectTypes {
 		ALL, DIRECTORY, FILE, SYMLINK
 	}
 
-	public static enum FsSelectTypes  implements java.io.Serializable {
+	public static enum FsSelectTypes {
 		SINGLE_SELECT, MULTI_SELECT
 	}
 
-	@Extension @Symbol("fileSystemList")
+	@Extension
+	@Symbol("fileSystemList")
 	public static class DescriptorImpl extends ParameterDescriptor {
 		@Override
 		public String getDisplayName() {
@@ -74,29 +78,29 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			return FormValidation.ok();
 		}
 
-		public FormValidation doCheckPath(@QueryParameter final String path, @QueryParameter final String selectedNodeName) throws IOException, InterruptedException {
+		public FormValidation doCheckPath(@QueryParameter final String path, @QueryParameter final String selectedNodeName)
+				throws IOException, InterruptedException {
 			if (StringUtils.isBlank(path)) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathCanNotBeEmpty());
 			}
-			
+
 			// Check Path is symlink
 			if (hudson.Util.isSymlink(new File(path))) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_SymlinkPathNotAllowed(), path);
 			}
-			
+
 			Jenkins instance = Jenkins.getInstanceOrNull();
 
 			// Check Path allowed
-			if (instance != null && !isAllowedPath(path, instance.getRootDir(), null)){
+			if (instance != null && !Utils.isAllowedPath(path, instance.getRootDir(), null)) {
 				return FormValidation.error(Messages.FileSystemListParameterDefinition_PathNotAllowed(), path);
 			}
-
 
 			// Check nodes
 			Computer computer = null;
 			VirtualChannel channel = null;
 
-			if (selectedNodeName==null || selectedNodeName.equals(MASTER)) {
+			if (selectedNodeName == null || selectedNodeName.equals(MASTER)) {
 				File dir = new File(path);
 				if (!dir.exists()) {
 					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
@@ -110,15 +114,13 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 			} else {
 
-
 				if (!selectedNodeName.trim().isEmpty() && instance != null) {
 					computer = instance.getComputer(selectedNodeName);
 					if (computer != null) {
 						channel = computer.getChannel();
 					}
 				}
-				
-				
+
 				FilePath filepath = new FilePath(channel, path);
 				if (!filepath.exists()) {
 					return FormValidation.error(Messages.FileSystemListParameterDefinition_PathDoesntExist(), path);
@@ -156,37 +158,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 
 	}
 
-	// TODO: Remove administrativeMonitor with next release!
-	//check allowedPath
-	static boolean isAllowedPath(final String path, final File jenkinsRootDir, FileSystemListParameterGlobalConfiguration testGC) {
-			FileSystemListParameterGlobalConfiguration globalConfig;
-			// inject testing gc
-			if(testGC==null) {
-					globalConfig = FileSystemListParameterGlobalConfiguration.get();
-			} else {
-					globalConfig = testGC;
-			}
-			List<AdditionalBaseDirPath> additionalBaseDirs = globalConfig.getAdditionalBaseDirs();
-			Path pathToCheck;
-			try {
-					pathToCheck = new File(path).toPath().toRealPath();
-					// userContent
-					if (globalConfig.isEnabledUserContent()) {
-							String userContentPath = jenkinsRootDir.getCanonicalPath() + File.separator + "userContent" + File.separator;
-							if (pathToCheck.startsWith(userContentPath)) {return true;}
-					}
-					// AllowedPathList
-					for (AdditionalBaseDirPath baseDir : additionalBaseDirs) {
-							String baseDirCanonical = new File(baseDir.getAdditionalBaseDirPath()).getCanonicalPath() + File.separator;
-							if (pathToCheck.startsWith(baseDirCanonical)) {return true;}
-					}
-			} catch (IOException e) {
-					LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_PathCheckError(), path));
-			}
-			return false;
-	}
-
-
 	private String selectedNodeName;
 	private String path;
 	private String selectedType;
@@ -198,21 +169,22 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	private String regexExcludePattern;
 	private String value;
 	private String defaultValue;
-  private boolean includePathInValue;
+	private boolean includePathInValue;
 
 	/**
 	 * @param name
 	 * @param description
 	 */
 	@DataBoundConstructor
-	public FileSystemListParameterDefinition(String name, String description, String selectedNodeName, String path, String defaultValue, String selectedType,
+	public FileSystemListParameterDefinition(String name, String description, String selectedNodeName, String path,
+			String defaultValue, String selectedType,
 			String formSelectType, String regexIncludePattern, String regexExcludePattern, boolean sortByLastModified,
 			boolean sortReverseOrder, boolean includePathInValue) {
 
-    super(name);
+		super(name);
 
 		this.selectedNodeName = selectedNodeName;
-	  this.path = Util.fixNull(path);
+		this.path = Util.fixNull(path);
 		this.defaultValue = defaultValue;
 		this.selectedType = selectedType;
 		this.formSelectType = formSelectType;
@@ -221,34 +193,35 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		this.sortReverseOrder = sortReverseOrder;
 		this.regexIncludePattern = regexIncludePattern;
 		this.regexExcludePattern = regexExcludePattern;
-    this.includePathInValue = includePathInValue;
+		this.includePathInValue = includePathInValue;
 	}
-
 
 	// https://issues.jenkins.io/browse/JENKINS-74886
 	@Override
 	public ParameterValue createValue(CLICommand command, String value) throws IOException, InterruptedException {
-		StringParameterValue parameterValue = new StringParameterValue(this.getName(), this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value));
+		StringParameterValue parameterValue = new StringParameterValue(this.getName(),
+				this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value));
 		return checkParameterValue(parameterValue);
 	}
-	
+
 	private ParameterValue checkParameterValue(StringParameterValue parameterValue) {
 		try {
 			List<String> valuesPossible = getFsObjectsList();
 			if (valuesPossible.contains(parameterValue.getValue())) {
 				return parameterValue;
 			} else {
-				//throw new UnsupportedOperationException("Value not valid!");
-				//return new StringParameterValue(this.getName(), "injected_value_not_valid__please_check_objects_list");
-				LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_InjectedObjectNotFoundAtPath(), parameterValue.getValue(), path));
+				// throw new UnsupportedOperationException("Value not valid!");
+				// return new StringParameterValue(this.getName(),
+				// "injected_value_not_valid__please_check_objects_list");
+				LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_InjectedObjectNotFoundAtPath(),
+						parameterValue.getValue(), path));
 				return null;
 			}
 		} catch (Exception e) {
 			throw new UnsupportedOperationException("Problem checking value: " + e.getMessage());
 		}
 	}
-		
-		
+
 	@Override
 	public ParameterValue createValue(StaplerRequest2 request) {
 		String parameterValues[] = request.getParameterValues(getName());
@@ -256,7 +229,8 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 			return getDefaultParameterValue();
 		}
 		String value = parameterValues[0];
-		StringParameterValue stringParameterValue = new StringParameterValue(this.getName(), this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value));
+		StringParameterValue stringParameterValue = new StringParameterValue(this.getName(),
+				this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value));
 
 		return checkParameterValue(stringParameterValue);
 	}
@@ -266,16 +240,16 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		Object value = jO.get("value");
 		String strValue = "";
 		if (value instanceof String) {
-            strValue = this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath() : String.valueOf(value);
+			strValue = this.isIncludePathInValue() ? new File(this.path, String.valueOf(value)).getPath()
+					: String.valueOf(value);
 		} else if (value instanceof JSONArray) {
 			JSONArray jsonValues = (JSONArray) value;
-            strValue = StringUtils.join(
-                    this.isIncludePathInValue() ? jsonValues.stream()
-                                                        .filter(e -> !StringUtils.isBlank(String.valueOf(e)))
-                                                        .map(e -> new File(this.path, String.valueOf(e)).getPath()).iterator()
-                                            : jsonValues.iterator(), 
-                    ','
-            );
+			strValue = StringUtils.join(
+					this.isIncludePathInValue() ? jsonValues.stream()
+							.filter(e -> !StringUtils.isBlank(String.valueOf(e)))
+							.map(e -> new File(this.path, String.valueOf(e)).getPath()).iterator()
+							: jsonValues.iterator(),
+					',');
 		}
 		return new FileSystemListParameterValue(getName(), strValue);
 	}
@@ -291,10 +265,9 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 					String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(), localDefaultValue));
 		}
 		if (!StringUtils.isBlank(localDefaultValue)) {
-            return new FileSystemListParameterValue(
-                getName(), 
-                this.isIncludePathInValue() ? new File(this.path, localDefaultValue).getPath() : localDefaultValue
-            );
+			return new FileSystemListParameterValue(
+					getName(),
+					this.isIncludePathInValue() ? new File(this.path, localDefaultValue).getPath() : localDefaultValue);
 		}
 		return super.getDefaultParameterValue();
 	}
@@ -308,33 +281,46 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		}
 	}
 
-	public List<String> getFsObjectsList() throws Exception {
+	static class FilesLister extends MasterToSlaveFileCallable<List<String>> {
 
-		Computer computer = null;
-		VirtualChannel channel = null;
-		Jenkins instance = Jenkins.getInstanceOrNull();
-		
-		if (getSelectedNodeName() != null && !getSelectedNodeName().trim().isEmpty() && instance != null) {
-			computer = instance.getComputer(getSelectedNodeName());
-			if (computer != null) {
-				channel = computer.getChannel();
-			}
+		private static final long serialVersionUID = 1;
+		private FsObjectTypes selectedEnumType;
+		private String regexIncludePattern;
+		private String regexExcludePattern;
+		private String path;
+		private boolean isSortByLastModified;
+		private boolean isSortReverseOrder;
+
+		FilesLister(FsObjectTypes selectedEnumType, String regexIncludePattern, String regexExcludePattern,
+				String path, boolean isSortByLastModified, boolean isSortReverseOrder) {
+			this.selectedEnumType = selectedEnumType;
+			this.regexIncludePattern = regexIncludePattern;
+			this.regexExcludePattern = regexExcludePattern;
+			this.path = path;
+			this.isSortByLastModified = isSortByLastModified;
+			this.isSortReverseOrder = isSortReverseOrder;
 		}
 
+		@Override
+		public List<String> invoke(File rootDir, VirtualChannel channel) {
+			TreeMap<String, Long> map = new TreeMap<>();
+			
+			try {
+				// additional check prevent symlink usage
+				Path realPath = rootDir.toPath().toRealPath();
+				Path absolutePath = rootDir.toPath().toAbsolutePath();
+				if(!realPath.equals(absolutePath)) {
+					List<String> notAllowedList = new ArrayList<String>();
+					String msgNotAllowed = String.format(Messages.FileSystemListParameterDefinition_PathNotAllowed()+" Symlinks are not allowed to be used as list objects path.", this.path)
+							.toString();
+					LOGGER.warning(msgNotAllowed);
+					notAllowedList.add(msgNotAllowed);
+					return notAllowedList;
+				}
+				File[] listFiles = rootDir.listFiles();
 
-		FilePath rootPath = new FilePath(channel, path);
-		class FilesLister implements FileCallable<List<String>> {
-
-			private static final long serialVersionUID = 1;
-
-			@Override
-			public List<String> invoke(File rootDir, VirtualChannel channel) {
-				final TreeMap<String, Long> map = new TreeMap<>();
-				try {
-					File[] listFiles = rootDir.listFiles();
-
-					if (listFiles != null) {
-						switch (getSelectedEnumType()) {
+				if (listFiles != null) {
+					switch (this.selectedEnumType) {
 						case SYMLINK:
 							createSymlinkMap(listFiles, map);
 							break;
@@ -347,135 +333,128 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 						default:
 							createAllObjectsMap(listFiles, map);
 							break;
-						}
 					}
-				} catch (IOException e) {
-					LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(),
-							"Failed to obtain"));
 				}
-				return sortList(map);
+			} catch (IOException e) {
+				LOGGER.warning(String.format(Messages.FileSystemListParameterDefinition_SymlinkDetectionError(),
+						"Failed to obtain"));
 			}
 
-			@Override
-			public void checkRoles(RoleChecker rc) throws SecurityException {
-				throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-																				// choose Tools | Templates.
+			if (map.isEmpty()) {
+				List<String> list = new ArrayList<String>();
+				String msg = String.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(),
+						this.selectedEnumType, this.regexIncludePattern, this.regexExcludePattern, this.path).toString();
+				LOGGER.warning(msg);
+				list.add(msg);
+				return list;
 			}
 
+			return sortList(map);
 		}
-		return rootPath.act(new FilesLister());
-	}
 
-	List<String> sortList(Map<String, Long> map) {
-		List<String> list;
-		Jenkins instance = Jenkins.getInstanceOrNull();
-        if (instance != null && !isAllowedPath(this.path, instance.getRootDir(), null)){
-		    list = new ArrayList<String>();
-		    String msg = String.format(Messages.FileSystemListParameterDefinition_PathNotAllowed(),
-		             getPath()).toString();
-		    LOGGER.warning(msg);
-		    list.add(msg);
-	    } else if (map.isEmpty()) {
-			list = new ArrayList<String>();
-			String msg = String.format(Messages.FileSystemListParameterDefinition_NoObjectsFoundAtPath(),
-					getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(), getPath()).toString();
-			LOGGER.warning(msg);
-			list.add(msg);
-		} else {
-			// Sorting:
-			if (isSortByLastModified()) {
-				list = createTimeSortedList(map);
+		private boolean isPatternMatching(String name) {
+
+			if (this.regexIncludePattern.equals("") && this.regexExcludePattern.equals("")) {
+				return true;
+			}
+
+			if (!this.regexIncludePattern.equals("") && this.regexExcludePattern.equals("")) {
+				return name.matches(this.regexIncludePattern);
+			}
+			if (this.regexIncludePattern.equals("") && !this.regexExcludePattern.equals("")) {
+				return !name.matches(this.regexExcludePattern);
+			}
+
+			return name.matches(this.regexIncludePattern) && !name.matches(this.regexExcludePattern);
+		}
+
+		private void createSymlinkMap(File[] listFiles, Map<String, Long> target) throws IOException {
+			for (File file : listFiles) {
+				if (!file.isHidden() && hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
+					target.put(file.getName(), file.lastModified());
+					LOGGER.finest("add " + file);
+				}
+			}
+		}
+
+		private void createDirectoryMap(File[] listFiles, Map<String, Long> target) throws IOException {
+			for (File file : listFiles) {
+				if (!file.isHidden() && file.isDirectory() && !hudson.Util.isSymlink(file)
+						&& isPatternMatching(file.getName())) {
+					target.put(file.getName(), file.lastModified());
+					LOGGER.finest("add " + file);
+				}
+			}
+		}
+
+		private void createFileMap(File[] listFiles, Map<String, Long> target) throws IOException {
+			for (File file : listFiles) {
+				if (!file.isHidden() && file.isFile() && !hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
+					target.put(file.getName(), file.lastModified());
+					LOGGER.finest("add " + file);
+				}
+			}
+		}
+
+		private void createAllObjectsMap(File[] listFiles, Map<String, Long> target) {
+			for (File file : listFiles) {
+				if (!file.isHidden() && isPatternMatching(file.getName())) {
+					target.put(file.getName(), file.lastModified());
+					LOGGER.finest("add " + file);
+				}
+			}
+		}
+
+		List<String> sortList(Map<String, Long> map) {
+			List<String> list = new ArrayList<String>();
+
+			if (this.isSortByLastModified) {
+				list = Utils.createTimeSortedList(map);
 			} else {
-				list = new ArrayList<String>();
 				list.addAll(map.keySet());
 			}
-			if (isSortReverseOrder()) {
+			if (this.isSortReverseOrder) {
 				Collections.reverse(list);
 			}
+			return list;
 		}
-
-		return list;
 	}
 
-	static List<String> createTimeSortedList(Map<String, Long> map) {
-		List<String> list = new ArrayList<String>();
+	public List<String> getFsObjectsList() throws Exception {
 
-		Collection<Long> valuesC = map.values();
-		List<Long> sortList = new ArrayList<Long>(valuesC);
-		Collections.sort(sortList);
+		Computer computer = null;
+		VirtualChannel channel = null;
+		Jenkins instance = Jenkins.getInstanceOrNull();
+		File jenkinsRootdir = null;
 
-		// iterate over sorted values
-		for (Long value : sortList) {
-
-			if (map.containsValue(value)) {
-
-				// key with lowest value will be added first
-				for (Map.Entry<String, Long> entry : map.entrySet()) {
-					if (value.equals(entry.getValue())) {
-						list.add(entry.getKey());
-					}
-				}
+		if (getSelectedNodeName() != null && !getSelectedNodeName().trim().isEmpty() && instance != null) {
+			computer = instance.getComputer(getSelectedNodeName());
+			if (computer != null) {
+				channel = computer.getChannel();
 			}
+			jenkinsRootdir = instance.getRootDir();
 		}
 
-		return list;
+		// handle not allowed
+		List<String> notAllowedList = new ArrayList<String>();
+		String msgNotAllowed = String.format(Messages.FileSystemListParameterDefinition_PathNotAllowed(), this.path)
+				.toString();
+		LOGGER.warning(msgNotAllowed);
+		notAllowedList.add(msgNotAllowed);
+		if (instance == null) {
+			notAllowedList.add("Jenkins instance is null! Sorry.");
+			return notAllowedList;
+		}
+		if (!Utils.isAllowedPath(this.path, jenkinsRootdir, testGC)) {
+			return notAllowedList;
+		}
+
+		FilePath rootPath = new FilePath(channel, this.path);
+
+		return rootPath.act(new FilesLister(getSelectedEnumType(), getRegexIncludePattern(), getRegexExcludePattern(),
+				getPath(), isSortByLastModified(), isSortReverseOrder()));
 	}
 
-	private boolean isPatternMatching(String name) {
-
-		if (getRegexIncludePattern().equals("") && getRegexExcludePattern().equals("")) {
-			return true;
-		}
-
-		if (!getRegexIncludePattern().equals("") && getRegexExcludePattern().equals("")) {
-			return name.matches(getRegexIncludePattern());
-		}
-		if (getRegexIncludePattern().equals("") && !getRegexExcludePattern().equals("")) {
-			return !name.matches(getRegexExcludePattern());
-		}
-
-		return name.matches(getRegexIncludePattern()) && !name.matches(getRegexExcludePattern());
-	}
-
-	private void createSymlinkMap(File[] listFiles, Map<String, Long> target) throws IOException {
-
-		for (File file : listFiles) {
-			if (!file.isHidden() && hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
-				target.put(file.getName(), file.lastModified());
-				LOGGER.finest("add " + file);
-			}
-		}
-	}
-
-	private void createDirectoryMap(File[] listFiles, Map<String, Long> target) throws IOException {
-
-		for (File file : listFiles) {
-			if (!file.isHidden() && file.isDirectory() && !hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
-				target.put(file.getName(), file.lastModified());
-				LOGGER.finest("add " + file);
-			}
-		}
-	}
-
-	private void createFileMap(File[] listFiles, Map<String, Long> target) throws IOException {
-
-		for (File file : listFiles) {
-			if (!file.isHidden() && file.isFile() && !hudson.Util.isSymlink(file) && isPatternMatching(file.getName())) {
-				target.put(file.getName(), file.lastModified());
-				LOGGER.finest("add " + file);
-			}
-		}
-	}
-
-	private void createAllObjectsMap(File[] listFiles, Map<String, Long> target) {
-
-		for (File file : listFiles) {
-			if (!file.isHidden() && isPatternMatching(file.getName())) {
-				target.put(file.getName(), file.lastModified());
-				LOGGER.finest("add " + file);
-			}
-		}
-	}
 	/*
 	 * Creates list to display in config.jelly
 	 */
@@ -542,19 +521,18 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		ArrayList<String> list = new ArrayList<String>();
 		final List<Node> nodes = Jenkins.get().getNodes();
 
-			// add master
-			list.add(MASTER);
-			for (Node node : nodes) {
-				String tmpNodeName = node.getNodeName();
-				if (StringUtils.isNotBlank(tmpNodeName)) {
-					LOGGER.finest("# add " + tmpNodeName);
-					list.add(tmpNodeName);
-				}
+		// add master
+		list.add(MASTER);
+		for (Node node : nodes) {
+			String tmpNodeName = node.getNodeName();
+			if (StringUtils.isNotBlank(tmpNodeName)) {
+				LOGGER.finest("# add " + tmpNodeName);
+				list.add(tmpNodeName);
 			}
+		}
 
 		return list;
 	}
-
 
 	public String getPath() {
 		return path;
@@ -599,17 +577,16 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	public String setSelectedNodeName() {
 		return selectedNodeName;
 	}
-	
+
 	public String getDefaultValue() {
 		return defaultValue;
 	}
 
 	public void setDescription(String description) {
-	    super.setDescription(description);
+		super.setDescription(description);
 	}
 
 	public boolean isIncludePathInValue() {
 		return includePathInValue;
 	}
-
 }
