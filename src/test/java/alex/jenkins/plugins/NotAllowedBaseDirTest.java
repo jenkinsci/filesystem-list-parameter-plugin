@@ -1,48 +1,45 @@
 package alex.jenkins.plugins;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import jenkins.model.GlobalConfiguration;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import jenkins.model.GlobalConfiguration;
-import jenkins.model.Jenkins;
+@WithJenkins
+class NotAllowedBaseDirTest {
 
-public class NotAllowedBaseDirTest {
+    private JenkinsRule j;
 
-    @Rule 
-    public JenkinsRule j = new JenkinsRule();
-    
-    String allowedPath;
-    String allowedFile;
-    String allowedSimilarFile;
-    String notAllowedPath;
-    String notAllowedFile;
-    String notAllowedSimilarFile;
-    String userContentAllowedFile;
-    File jenkinsTmpRoot;
-    Jenkins jenkins;
-    FileSystemListParameterGlobalConfiguration gc;
+    private String allowedPath;
+    private String allowedFile;
+    private String allowedSimilarFile;
+    private String notAllowedPath;
+    private String notAllowedFile;
+    private String notAllowedSimilarFile;
+    private String userContentAllowedFile;
+    private File jenkinsTmpRoot;
+    private FileSystemListParameterGlobalConfiguration gc;
 
-    @Before
-    public void setup(){
-        allowedPath=getAbsolutePath("/1");
-        allowedFile=allowedPath+ File.separator+"test1.txt";
-        allowedSimilarFile=allowedPath+"test1.txt";
-        notAllowedPath=getAbsolutePath("/2");
-        notAllowedFile=notAllowedPath+ File.separator+"notAllowed.txt";
-        notAllowedSimilarFile=notAllowedPath+"notAllowed.txt";
-        jenkinsTmpRoot=new File(getAbsolutePath("/"));
-        userContentAllowedFile=jenkinsTmpRoot.getAbsolutePath()+File.separator+"userContent"+File.separator+"allowed.txt";
-        jenkins = Jenkins.get();
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+        allowedPath = getAbsolutePath("/1");
+        allowedFile = allowedPath + File.separator + "test1.txt";
+        allowedSimilarFile = allowedPath + "test1.txt";
+        notAllowedPath = getAbsolutePath("/2");
+        notAllowedFile = notAllowedPath + File.separator + "notAllowed.txt";
+        notAllowedSimilarFile = notAllowedPath + "notAllowed.txt";
+        jenkinsTmpRoot = new File(getAbsolutePath("/"));
+        userContentAllowedFile = jenkinsTmpRoot.getAbsolutePath() + File.separator + "userContent" + File.separator + "allowed.txt";
         gc = new FileSystemListParameterGlobalConfiguration();
         GlobalConfiguration.all().get(FileSystemListParameterGlobalConfiguration.class);
         List<AdditionalBaseDirPath> list = gc.getAdditionalBaseDirs();
@@ -50,26 +47,25 @@ public class NotAllowedBaseDirTest {
         list.add(additionalBaseDirs);
         gc.setAdditionalBaseDirs(list);
         gc.setEnabledUserContent(true);
-		FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "", "FILE","SINGLE_SELECT", "", "", false, false, false);
+        FileSystemListParameterDefinition pd = new FileSystemListParameterDefinition("name", "description", "master", "path", "", "FILE", "SINGLE_SELECT", "", "", false, false, false);
         pd.getDefaultValue();
         FileSystemListParameterDefinition.addTestGC(gc);
     }
-    
-    private String getAbsolutePath(String path) {
-        URL resource = getClass().getResource(path);
-        Assert.assertNotNull("Test test directory missing", resource);
+
+    private static String getAbsolutePath(String path) {
+        URL resource = NotAllowedBaseDirTest.class.getResource(path);
+        assertNotNull(resource, "Test test directory missing");
         File dir = new File(resource.getPath());
         return dir.getAbsolutePath();
     }
-    
+
     @Test
-    public void testPaths() {
+    void testPaths() {
         assertFalse(allowedPath.startsWith(notAllowedPath));
     }
-    
-    
+
     @Test
-    public void testAdditionalBaseDir() {
+    void testAdditionalBaseDir() {
         assertTrue(Utils.isAllowedPath(allowedPath, jenkinsTmpRoot, gc));
         assertFalse(Utils.isAllowedPath(allowedSimilarFile, jenkinsTmpRoot, gc));
         assertFalse(Utils.isAllowedPath(notAllowedFile, jenkinsTmpRoot, gc));
@@ -77,7 +73,7 @@ public class NotAllowedBaseDirTest {
     }
 
     @Test
-    public void testUserContent() {
+    void testUserContent() {
         assertTrue(Utils.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));
         gc.setEnabledUserContent(false);
         assertFalse(Utils.isAllowedPath(userContentAllowedFile, jenkinsTmpRoot, gc));

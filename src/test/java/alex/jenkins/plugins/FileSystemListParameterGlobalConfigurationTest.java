@@ -1,7 +1,7 @@
 package alex.jenkins.plugins;
 
 
-public class FileSystemListParameterGlobalConfigurationTest {
+class FileSystemListParameterGlobalConfigurationTest {
     //TODO
 }
 
