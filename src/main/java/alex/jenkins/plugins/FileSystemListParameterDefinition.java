@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +17,13 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
-import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerRequest2;
 
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.FilePath.FileCallable;
 import hudson.Util;
 import hudson.cli.CLICommand;
 import hudson.model.Computer;
@@ -223,6 +221,24 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 	}
 
 	@Override
+	public ParameterValue createValue(StaplerRequest req) {
+			return createValue(requireRequest2(req));
+	}
+
+	@Override
+	public ParameterValue createValue(StaplerRequest req, JSONObject jo) {
+			return createValue(requireRequest2(req), jo);
+	}
+
+	private StaplerRequest2 requireRequest2(StaplerRequest req) {
+			if (req instanceof StaplerRequest2) {
+					return (StaplerRequest2) req;
+			}
+			throw new IllegalStateException(
+					"StaplerRequest2 expected but got " + req.getClass()
+			);
+	}
+
 	public ParameterValue createValue(StaplerRequest2 request) {
 		String parameterValues[] = request.getParameterValues(getName());
 		if (parameterValues == null || parameterValues.length == 0) {
@@ -235,7 +251,6 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return checkParameterValue(stringParameterValue);
 	}
 
-	@Override
 	public ParameterValue createValue(StaplerRequest2 request, JSONObject jO) {
 		Object value = jO.get("value");
 		String strValue = "";
@@ -254,7 +269,7 @@ public class FileSystemListParameterDefinition extends ParameterDefinition {
 		return new FileSystemListParameterValue(getName(), strValue);
 	}
 
-	@Override
+
 	public ParameterValue getDefaultParameterValue() {
 		String localDefaultValue = "";
 

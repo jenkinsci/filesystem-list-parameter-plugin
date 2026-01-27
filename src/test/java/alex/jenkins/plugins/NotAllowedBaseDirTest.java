@@ -20,7 +20,7 @@ class NotAllowedBaseDirTest {
     private JenkinsRule j;
 
     private String allowedPath;
-    private String allowedFile;
+    //private String allowedFile;
     private String allowedSimilarFile;
     private String notAllowedPath;
     private String notAllowedFile;
@@ -33,7 +33,7 @@ class NotAllowedBaseDirTest {
     void setUp(JenkinsRule rule) {
         j = rule;
         allowedPath = getAbsolutePath("/1");
-        allowedFile = allowedPath + File.separator + "test1.txt";
+        //allowedFile = allowedPath + File.separator + "test1.txt";
         allowedSimilarFile = allowedPath + "test1.txt";
         notAllowedPath = getAbsolutePath("/2");
         notAllowedFile = notAllowedPath + File.separator + "notAllowed.txt";

@@ -10,6 +10,9 @@ For more information see the [homepage].
 
 # Change Log
 
+##### Version 0.0.18 (January 19, 2026)
+- Dependency updates.
+
 ##### Version 0.0.17 (February 18, 2025)
 - Remove administrative monitor "reminder to configure allowed base dirs".
 - Fix allowed base dirs feature:

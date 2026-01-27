@@ -11,7 +11,7 @@
 
   <groupId>aendter.jenkins.plugins</groupId>
   <artifactId>filesystem-list-parameter-plugin</artifactId>
-  <version>0.0.18-SNAPSHOT</version>
+  <version>0.0.19-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>Jenkins Filesystem List Parameter Plug-in</name>
@@ -19,8 +19,9 @@
   <properties>
     <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
     <jenkins.baseline>2.479</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <ban-commons-lang-2.skip>false</ban-commons-lang-2.skip>
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
 
   <licenses>
@@ -69,7 +70,7 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>4136.vca_c3202a_7fd1</version>
+        <version>4669.v0e99c712a_30e</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
